@@ -3,55 +3,242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader - Register</title>
+<title>Face Reader - Register Operative</title>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0f172a; color:#fff; font-family:Arial,sans-serif; min-height:100vh; }
-.container { max-width:600px; margin:0 auto; padding:30px 20px; }
-.logo { text-align:center; font-size:32px; font-weight:900; margin-bottom:10px; background: linear-gradient(135deg, #06b6d4, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.tagline { text-align:center; color:#94a3b8; margin-bottom:30px; }
-.card { background:#1e293b; padding:25px; border-radius:15px; margin-bottom:20px; }
-h2 { margin-bottom:20px; color:#f1f5f9; }
-input { width:100%; padding:12px; margin:8px 0 20px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:#fff; }
-/* Ensures the date picker icon is visible on dark background */
-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-button { width:100%; padding:16px; margin:10px 0; border-radius:10px; border:none; font-weight:700; cursor:pointer; color:#fff; font-size:16px; }
-.btn-start { background:#0891b2; }
-.btn-start:disabled { background:#475569; opacity:0.5; }
-.btn-capture { background:#10b981; display:none; font-size:18px; }
-.status { padding:14px; border-radius:10px; text-align:center; margin-bottom:20px; font-weight:600; }
-.status-info { background:#1e3a8a; color:#93c5fd; }
-.status-success { background:#064e3b; color:#34d399; }
-.status-error { background:#7f1d1d; color:#f87171; }
-#video { width:100%; border-radius:12px; display:none; margin:15px 0; border:3px solid #334155; }
-#video.ready { border-color:#10b981; box-shadow:0 0 20px rgba(16,185,129,0.5); }
-.footer { text-align:center; font-size:11px; color:#64748b; margin-top:20px; }
+body {
+background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+color:#fff;
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+min-height:100vh;
+padding: 20px;
+}
+.container { max-width:600px; margin:0 auto; }
+
+header {
+text-align:center;
+padding:30px 0;
+margin-bottom:20px;
+border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+.logo {
+font-size:36px;
+font-weight:900;
+background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+letter-spacing: 2px;
+}
+
+.card {
+background: rgba(30, 41, 59, 0.8);
+padding:30px;
+border-radius:20px;
+margin-bottom:20px;
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+h2 {
+margin-bottom:25px;
+color:#f1f5f9;
+font-size:20px;
+}
+
+.label {
+display:block;
+font-size:12px;
+color:#94a3b8;
+text-transform:uppercase;
+letter-spacing:1px;
+margin-bottom:8px;
+font-weight:600;
+}
+
+input[type="text"], input[type="tel"], input[type="date"] {
+width:100%;
+padding:14px;
+margin-bottom:20px;
+border-radius:12px;
+border:2px solid rgba(255,255,255,0.1);
+background: rgba(15, 23, 42, 0.6);
+color:#fff;
+font-size:15px;
+transition: all 0.3s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+filter: invert(1);
+cursor: pointer;
+}
+
+input:focus {
+outline: none;
+border-color: #06b6d4;
+box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
+}
+
+.status-box {
+padding:16px;
+border-radius:12px;
+text-align:center;
+font-weight:600;
+margin-bottom:25px;
+font-size:15px;
+}
+
+.status-loading {
+background: rgba(30, 58, 138, 0.6);
+color:#93c5fd;
+border: 1px solid rgba(147, 197, 253, 0.3);
+}
+
+.status-ready {
+background: rgba(6, 78, 59, 0.6);
+color:#34d399;
+border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.status-error {
+background: rgba(127, 29, 29, 0.6);
+color:#f87171;
+border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.status-scanning {
+background: rgba(254, 243, 199, 0.2);
+color:#fbbf24;
+border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+button {
+width:100%;
+padding:16px;
+margin:10px 0;
+border-radius:12px;
+border:none;
+font-weight:700;
+cursor:pointer;
+color:#fff;
+font-size:16px;
+transition: all 0.3s;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.btn-camera {
+background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+}
+
+.btn-camera:disabled {
+background:#475569;
+opacity:0.5;
+cursor:not-allowed;
+box-shadow: none;
+}
+
+.btn-camera:hover:not(:disabled) {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+}
+
+.btn-capture {
+background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+display:none;
+font-size:18px;
+}
+
+.btn-capture:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+#video {
+width:100%;
+border-radius:15px;
+display:none;
+margin:20px 0;
+border: 3px solid rgba(6, 182, 212, 0.5);
+box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+#video.active {
+border-color: #10b981;
+box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+}
+
+.footer {
+text-align:center;
+font-size:12px;
+color:#64748b;
+margin-top:30px;
+padding:20px 0;
+border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.loading-dots::after {
+content: '';
+animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+0%, 20% { content: ''; }
+40% { content: '.'; }
+60% { content: '..'; }
+80%, 100% { content: '...'; }
+}
 </style>
 </head>
 <body>
 <div class="container">
+<header>
 <div class="logo">FACE READER</div>
-<div class="tagline">Attendance System</div>
+</header>
 
-<div id="status" class="status status-info">Loading...</div>
+<div id="statusBox" class="status-box status-loading">
+Loading AI models<span class="loading-dots"></span>
+</div>
 
 <div class="card">
-<h2> Register Operative</h2>
-<input type="text" id="name" placeholder="Full Name *" required>
-<input type="text" id="company" placeholder="Company *" required>
-<input type="text" id="role" placeholder="Role/Job Title">
-<input type="tel" id="phone" placeholder="Phone Number">
-<input type="text" id="supervisor" placeholder="Direct Line Manager / Supervisor">
-<input type="text" id="qualifications" placeholder="Qualifications (e.g., CSCS, First Aid)">
-<input type="date" id="qualExpiry" title="Qualification Expiry Date">
-<input type="text" id="qrCode" placeholder="QR Code ID (Optional)">
+<h2> Register New Operative</h2>
 
-<button class="btn-start" id="btnStart" onclick="startCamera()" disabled> Start Camera</button>
+<label class="label">Full Name *</label>
+<input type="text" id="name" placeholder="" required>
+
+<label class="label">Company / Employer *</label>
+<input type="text" id="company" placeholder="" required>
+
+<label class="label">Role / Job Title</label>
+<input type="text" id="role" placeholder="">
+
+<label class="label">Phone Number</label>
+<input type="tel" id="phone" placeholder="">
+
+<label class="label">Direct Line Manager / Supervisor</label>
+<input type="text" id="supervisor" placeholder="">
+
+<label class="label">Qualifications</label>
+<input type="text" id="qualifications" placeholder="">
+
+<label class="label">Qualification Expiry Date</label>
+<input type="date" id="qualExpiry">
+
+<label class="label">QR Code ID (Optional)</label>
+<input type="text" id="qrCode" placeholder="">
+
+<button class="btn-camera" id="btnCamera" onclick="startCamera()" disabled>
+Open Camera
+</button>
+
 <video id="video" autoplay muted playsinline></video>
-<button class="btn-capture" id="btnCapture" onclick="captureFace()">✅ CAPTURE FACE</button>
+
+<button class="btn-capture" id="btnCapture" onclick="captureFace()">
+CAPTURE FACE
+</button>
 </div>
 
 <div class="footer">We Are A Team Together Ltd © 2026</div>
@@ -59,6 +246,7 @@ button { width:100%; padding:16px; margin:10px 0; border-radius:10px; border:non
 
 <script>
 const SITE_ID = "I";
+
 const firebaseConfig = {
 apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
 authDomain: "signin-facereader.firebaseapp.com",
@@ -76,28 +264,42 @@ const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
 
 let videoStream = null;
 let modelsLoaded = false;
+let isCameraActive = false;
+
+const statusBox = document.getElementById('statusBox');
+const btnCamera = document.getElementById('btnCamera');
+const btnCapture = document.getElementById('btnCapture');
+const video = document.getElementById('video');
+
+function setStatus(msg, type) {
+statusBox.textContent = msg;
+statusBox.className = 'status-box status-' + type;
+}
 
 async function loadModels() {
 try {
-setStatus('Loading AI models...', 'info');
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
-await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-setStatus('Loading landmarks...', 'info');
-await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-setStatus('Loading recognition...', 'info');
-await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-modelsLoaded = true;
-setStatus('✅ Ready! Click Start Camera', 'success');
-document.getElementById('btnStart').disabled = false;
-} catch (err) {
-setStatus('❌ Error loading models: ' + err.message, 'error');
-}
-}
+setStatus('Loading AI models...', 'loading');
 
-function setStatus(msg, type) {
-const statusEl = document.getElementById('status');
-statusEl.textContent = msg;
-statusEl.className = 'status status-' + type;
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+
+console.log('Loading face detection model...');
+await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+
+console.log('Loading face landmarks model...');
+await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+
+console.log('Loading face recognition model...');
+await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+modelsLoaded = true;
+setStatus(' Ready! Fill in details and click Open Camera', 'ready');
+btnCamera.disabled = false;
+
+console.log('All models loaded successfully!');
+} catch (err) {
+console.error('Model loading error:', err);
+setStatus(' Error loading models: ' + err.message, 'error');
+}
 }
 
 async function startCamera() {
@@ -105,44 +307,113 @@ const name = document.getElementById('name').value.trim();
 const company = document.getElementById('company').value.trim();
 
 if (!name || !company) {
-setStatus('⚠️ Fill in Name and Company', 'error');
+setStatus(' Please enter Name and Company first', 'error');
+document.getElementById('name').focus();
 return;
 }
 
 try {
-setStatus('📷 Starting camera...', 'info');
-videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+setStatus('Starting camera...', 'scanning');
 
-const video = document.getElementById('video');
+videoStream = await navigator.mediaDevices.getUserMedia({
+video: {
+facingMode: 'user',
+width: { ideal: 1280 },
+height: { ideal: 720 }
+}
+});
+
 video.srcObject = videoStream;
 video.style.display = 'block';
 
-document.getElementById('btnStart').style.display = 'none';
-document.getElementById('btnCapture').style.display = 'block';
+await new Promise((resolve) => {
+video.onloadedmetadata = () => {
+video.play();
+resolve();
+};
+});
 
-setStatus('👤 Position face, then click CAPTURE', 'info');
+video.classList.add('active');
+btnCamera.style.display = 'none';
+btnCapture.style.display = 'block';
+isCameraActive = true;
 
-// Monitor detection
-setInterval(async () => {
-if (video.readyState === 4) {
-try {
-const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.2 }));
-if (detection) {
-video.classList.add('ready');
-} else {
-video.classList.remove('ready');
-}
-} catch(e) {}
-}
-}, 1000);
+setStatus(' Position your face clearly, then click CAPTURE FACE', 'scanning');
 
+// Start face detection preview
+startFaceDetectionPreview();
+
+console.log('Camera started successfully');
 } catch (err) {
-setStatus('❌ Camera error: ' + err.message, 'error');
+console.error('Camera error:', err);
+setStatus(' Camera access denied. Please allow camera permissions.', 'error');
+}
+}
+
+async function startFaceDetectionPreview() {
+if (!isCameraActive) return;
+
+try {
+const detection = await faceapi.detectSingleFace(
+video,
+new faceapi.TinyFaceDetectorOptions({
+inputSize: 640,
+scoreThreshold: 0.3
+})
+);
+
+if (detection) {
+setStatus(' Face detected! Click CAPTURE FACE to register', 'ready');
+} else {
+setStatus(' Position your face in the camera', 'scanning');
+}
+} catch (err) {
+console.log('Detection preview error:', err);
+}
+
+if (isCameraActive) {
+setTimeout(startFaceDetectionPreview, 1000);
 }
 }
 
 async function captureFace() {
-const video = document.getElementById('video');
+if (!isCameraActive) {
+setStatus(' Camera not active. Please start camera first.', 'error');
+return;
+}
+
+setStatus(' Capturing face...', 'scanning');
+btnCapture.disabled = true;
+
+try {
+// Ensure video is playing
+if (video.paused || video.ended) {
+await video.play();
+}
+
+// Wait a moment for video to stabilize
+await new Promise(resolve => setTimeout(resolve, 500));
+
+console.log('Detecting face...');
+const detection = await faceapi.detectSingleFace(
+video,
+new faceapi.TinyFaceDetectorOptions({
+inputSize: 640,
+scoreThreshold: 0.3
+})
+).withFaceLandmarks()
+.withFaceDescriptor();
+
+if (!detection) {
+setStatus(' No face detected! Try better lighting and position.', 'error');
+btnCapture.disabled = false;
+return;
+}
+
+console.log('Face detected, extracting descriptor...');
+const faceDescriptor = Array.from(detection.descriptor);
+
+// Get form data
 const name = document.getElementById('name').value.trim();
 const company = document.getElementById('company').value.trim();
 const role = document.getElementById('role').value.trim();
@@ -152,43 +423,13 @@ const qualifications = document.getElementById('qualifications').value.trim();
 const qualExpiry = document.getElementById('qualExpiry').value.trim();
 const qrCode = document.getElementById('qrCode').value.trim();
 
-// Step 1
-setStatus('Step 1: Preparing camera...', 'info');
+setStatus(' Saving to database...', 'scanning');
 
-try {
-// Ensure video is playing
-await video.play();
-
-// Step 2
-setStatus('Step 2: Detecting face...', 'info');
-
-const detection = await faceapi.detectSingleFace(
-video,
-new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.2 })
-);
-
-if (!detection) {
-setStatus('⚠️ No face detected! Try better lighting', 'error');
-return;
-}
-
-// Step 3
-setStatus('Step 3: Getting face landmarks...', 'info');
-const landmarks = await faceapi.detectFaceLandmarks(video, detection);
-
-// Step 4
-setStatus('Step 4: Getting face descriptor...', 'info');
-const descriptor = await faceapi.computeFaceDescriptor(video, landmarks);
-
-// Step 5
-setStatus('Step 5: Saving to database...', 'info');
-
-const faceDescriptor = Array.from(descriptor);
+// Create new operative record
 const newRef = operativesRef.push();
 const id = newRef.key;
 
-// Save ALL text fields to Firebase (No images stored)
-await newRef.set({
+const operativeData = {
 name,
 company,
 role,
@@ -198,21 +439,27 @@ qualifications,
 qualExpiry,
 qrCode,
 createdAt: firebase.database.ServerValue.TIMESTAMP
+};
+
+// Save operative data
+await newRef.set(operativeData);
+console.log('Operative data saved:', id);
+
+// Save face descriptor
+await faceDescriptorsRef.child(id).set({
+descriptor: faceDescriptor,
+name,
+company
 });
-await faceDescriptorsRef.child(id).set({ descriptor: faceDescriptor, name, company });
+console.log('Face descriptor saved');
 
-// Step 6
-setStatus('✅ Successfully registered: ' + name, 'success');
+// Success!
+setStatus(' Successfully registered: ' + name, 'ready');
 
-if (videoStream) {
-videoStream.getTracks().forEach(t => t.stop());
-}
+// Cleanup
+stopCamera();
 
-video.style.display = 'none';
-document.getElementById('btnStart').style.display = 'block';
-document.getElementById('btnCapture').style.display = 'none';
-
-// Clear all fields for the next person
+// Clear form
 document.getElementById('name').value = '';
 document.getElementById('company').value = '';
 document.getElementById('role').value = '';
@@ -222,16 +469,32 @@ document.getElementById('qualifications').value = '';
 document.getElementById('qualExpiry').value = '';
 document.getElementById('qrCode').value = '';
 
+btnCamera.style.display = 'block';
+btnCapture.style.display = 'none';
+btnCapture.disabled = false;
+
 setTimeout(() => {
-setStatus('✅ Ready! Click Start Camera', 'success');
+setStatus(' Ready! Fill in details and click Open Camera', 'ready');
 }, 3000);
 
 } catch (err) {
 console.error('Capture error:', err);
-setStatus('❌ Error at Step: ' + err.message, 'error');
+setStatus(' Error: ' + err.message, 'error');
+btnCapture.disabled = false;
 }
 }
 
+function stopCamera() {
+if (videoStream) {
+videoStream.getTracks().forEach(track => track.stop());
+videoStream = null;
+}
+video.style.display = 'none';
+video.classList.remove('active');
+isCameraActive = false;
+}
+
+// Initialize
 loadModels();
 </script>
 </body>
