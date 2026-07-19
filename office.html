@@ -32,7 +32,7 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 .btn-export { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
 .btn-clear { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
 button:hover { transform: translateY(-2px); }
-.table-container { overflow-x: auto; } /* Makes table scrollable on small screens */
+.table-container { overflow-x: auto; }
 table { width:100%; border-collapse:separate; border-spacing: 0; min-width: 1000px; }
 th { background: rgba(15, 23, 42, 0.8); padding:16px; text-align:left; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing: 1.5px; font-weight:700; }
 th:first-child { border-top-left-radius: 10px; }
@@ -106,6 +106,7 @@ tr:hover { background: rgba(255,255,255,0.05); }
 
 <script>
 const SITE_ID = "I";
+
 const firebaseConfig = {
 apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
 authDomain: "signin-facereader.firebaseapp.com",
@@ -120,14 +121,17 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const signinsRef = db.ref('sites/' + SITE_ID + '/signins');
 const statusRef = db.ref('sites/' + SITE_ID + '/status');
-const operativesRef = db.ref('sites/' + SITE_ID + '/operatives'); // Added to pull training matrix data
+const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
 
 let allRecords = [];
-let exportCSV() { statusData = {};
-const
-let operativesData = {}; // Stores operative profiles for cross-referencing
+let statusData = {};
+let operativesData = {};
 
-function todayStart() { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function todayStart() {
+const d = new Date();
+d.setHours(0, 0, 0, 0);
+return d.getTime();
+}
 
 function escapeHtml(text) {
 if (!text) return '';
@@ -151,18 +155,26 @@ const expiry = new Date(expiryDateStr);
 const diffTime = expiry - today;
 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-if (diffDays < 0) return `<br><span class="expired">⚠️ EXPIRED (${diffDays} days ago)</span>`;
-if (diffDays <= 30) return `<br><span class="expired">⚠️ Expires in ${diffDays} days</span>`;
-return `<br><span class="valid">✅ Valid until ${expiryDateStr}</span>`;
+if (diffDays < 0) return '<br><span class="expired">⚠️ EXPIRED (' + diffDays + ' days ago)</span>';
+if (diffDays <= 30) return '<br><span class="expired">⚠️ Expires in ' + diffDays + ' days</span>';
+return '<br><span class="valid">✅ Valid until ' + expiryDateStr + '</span>';
 }
 
 function render() {
+try {
 const today = todayStart();
-const todays = allRecords.filter(r => r.timestamp && r.timestamp >= today);
-const onSiteNow = Object.values(statusData).filter(s => s && s.onSite).length;
-const totalIns = todays.filter(r => r.action === 'IN').length;
-const recent = todays.filter(r => Date.now() - r.timestamp < 15 * 60 * 1000).length;
-const unique = new Set(todays.map(r => r.operativeId)).size;
+const todays = allRecords.filter(function(r) { return r.timestamp && r.timestamp >= today; });
+const onSiteNow = Object.values(statusData).filter(function(s) { return s && s.onSite; }).length;
+const totalIns = todays.filter(function(r) { return r.action === 'IN'; }).length;
+const recent = todays.filter(function(r) { return Date.now() - r.timestamp < 15 * 60 * 1000; }).length;
+
+const uniqueIds = [];
+todays.forEach(function(r) {
+if (uniqueIds.indexOf(r.operativeId) === -1) {
+uniqueIds.push(r.operativeId);
+}
+});
+const unique = uniqueIds.length;
 
 document.getElementById('onsite').textContent = onSiteNow;
 document.getElementById('total').textContent = totalIns;
@@ -170,21 +182,28 @@ document.getElementById('recent').textContent = recent;
 document.getElementById('unique').textContent = unique;
 
 const companyCount = {};
-Object.values(statusData).forEach(s => {
+Object.values(statusData).forEach(function(s) {
 if (s && s.onSite) {
 const company = s.company || 'Unknown';
 companyCount[company] = (companyCount[company] || 0) + 1;
 }
 });
 
-const companies = Object.entries(companyCount).sort((a, b) => b[1] - a[1]);
+const companies = Object.entries(companyCount).sort(function(a, b) { return b[1] - a[1]; });
 const grid = document.getElementById('companyGrid');
-grid.innerHTML = companies.length ? companies.map(([c, n]) => `<div class="company-item"><div class="company-name">${escapeHtml(c)}</div><div class="company-count">${n}</div></div>`).join('') : '<div class="empty">No operatives on site</div>';
+
+if (companies.length === 0) {
+grid.innerHTML = '<div class="empty">No operatives on site</div>';
+} else {
+grid.innerHTML = companies.map(function(item) {
+return '<div class="company-item"><div class="company-name">' + escapeHtml(item[0]) + '</div><div class="company-count">' + item[1] + '</div></div>';
+}).join('');
+}
 
 const tbody = document.getElementById('tbody');
 const filter = document.getElementById('search').value.toLowerCase();
 
-let records = todays.filter(r => {
+let records = todays.filter(function(r) {
 const op = operativesData[r.operativeId] || {};
 const name = r.operativeName ? r.operativeName.toLowerCase() : '';
 const company = r.operativeCompany ? r.operativeCompany.toLowerCase() : '';
@@ -192,75 +211,91 @@ const method = r.method ? r.method.toLowerCase() : '';
 const phone = op.phone ? op.phone.toLowerCase() : '';
 const quals = op.qualifications ? op.qualifications.toLowerCase() : '';
 
-return name.includes(filter) || company.includes(filter) || method.includes(filter) || phone.includes(filter) || quals.includes(filter);
+return name.indexOf(filter) !== -1 ||
+company.indexOf(filter) !== -1 ||
+method.indexOf(filter) !== -1 ||
+phone.indexOf(filter) !== -1 ||
+quals.indexOf(filter) !== -1;
 });
 
-records.sort((a, b) => b.timestamp - a.timestamp);
+records.sort(function(a, b) { return b.timestamp - a.timestamp; });
 
 if (records.length === 0) {
 tbody.innerHTML = '<tr><td colspan="7" class="empty">No records today</td></tr>';
 } else {
-tbody.innerHTML = records.map(r => {
+tbody.innerHTML = records.map(function(r) {
 const time = new Date(r.timestamp).toLocaleTimeString();
 const methodClass = r.method === 'FACE' ? 'face' : 'qr';
 const actionClass = r.action === 'IN' ? 'in' : 'out';
 
-// Cross-reference with operativesData to get profile details
 const op = operativesData[r.operativeId] || {};
 
 let locationHtml = '<span style="color:#64748b">No location</span>';
 if (r.location && r.location.address) {
-const mapUrl = `https://www.google.com/maps?q=${r.location.lat},${r.location.lng}`;
-locationHtml = `<span class="location-icon">📍</span><span class="location-cell" title="${escapeHtml(r.location.address)}">${escapeHtml(r.location.address)}</span><a href="${mapUrl}" target="_ today = todayStartblank" class="map-link">View</a>`;
+const mapUrl = 'https://www.google.com/maps?q=' + r.location.lat + ',' + r.location.lng;
+locationHtml = '<span class="location-icon">📍</span><span class="location-cell" title="' + escapeHtml(r.location.address) + '">' + escapeHtml(r.location.address) + '</span><a href="' + mapUrl + '" target="_blank" class="map-link">View</a>';
 } else if (r.location && r.location.lat) {
-const mapUrl = `https://www.google.com/maps?q=${r.location.lat},${r.location.lng}`;
-locationHtml = `<span class="location-cell">${r.location.lat.toFixed(4)}, ${r.location.lng.toFixed(4)}</span><a href="${mapUrl}" target="_blank" class="map-link">🗺 View</a>`;
+const mapUrl = 'https://www.google.com/maps?q=' + r.location.lat + ',' + r.location.lng;
+locationHtml = '<span class="location-cell">' + r.location.lat.toFixed(4) + ', ' + r.location.lng.toFixed(4) + '</span><a href="' + mapUrl + '" target="_blank" class="map-link"> View</a>';
 }
 
-const contactHtml = `
-<div style="font-weight:600; font-size:14px;">${op.phone ? '📞 ' + escapeHtml(op.phone) : '<span style="color:#64748b">No phone</span>'}</div>
-${op.supervisor ? `<div style="font-size:12px; color:#94a3b8; margin-top:4px;">👤 ${escapeHtml(op.supervisor)}</div>` : ''}
-`;
+const contactHtml = '<div style="font-weight:600; font-size:14px;">' + (op.phone ? '📞 ' + escapeHtml(op.phone) : '<span style="color:#64748b">No phone</span>') + '</div>' +
+(op.supervisor ? '<div style="font-size:12px; color:#94a3b8; margin-top:4px;">👤 ' + escapeHtml(op.supervisor) + '</div>' : '');
 
-const qualsHtml = `
-<div style="font-weight:600; font-size:14px;">${op.qualifications ? escapeHtml(op.qualifications) : '<span style="color:#64748b">None recorded</span>'}</div>
-${checkExpiry(op.qualExpiry)}
-`;
+const qualsHtml = '<div style="font-weight:600; font-size:14px;">' + (op.qualifications ? escapeHtml(op.qualifications) : '<span style="color:#64748b">None recorded</span>') + '</div>' +
+checkExpiry(op.qualExpiry);
 
-return `<tr>
-<td>
-<div style="font-weight:700; font-size:15px;">${escapeHtml(r.operativeName)}</div>
-${r.operativeCompany ? `<div style="font-size:12px; color:#f97316; margin-top:4px;">${escapeHtml(r.operativeCompany)}</div>` : ''}
-</td>
-<td>${contactHtml}</td>
-<td>${qualsHtml}</td>
-<td><span class="method-badge ${methodClass}">${r.method || 'Unknown'}</span></td>
-<td><span class="action-badge ${actionClass}">${r.action || 'Unknown'}</span></td>
-<td>${locationHtml}</td>
-<td class="time">${time}<br><span style="font-size:11px; color:#64748b">${timeAgo(r.timestamp)}</span></td>
-</tr>`;
+return '<tr>' +
+'<td><div style="font-weight:700; font-size:15px;">' + escapeHtml(r.operativeName) + '</div>' +
+(r.operativeCompany ? '<div style="font-size:12px; color:#f97316; margin-top:4px;">' + escapeHtml(r.operativeCompany) + '</div>' : '') + '</td>' +
+'<td>' + contactHtml + '</td>' +
+'<td>' + qualsHtml + '</td>' +
+'<td><span class="method-badge ' + methodClass + '">' + (r.method || 'Unknown') + '</span></td>' +
+'<td><span class="action-badge ' + actionClass + '">' + (r.action || 'Unknown') + '</span></td>' +
+'<td>' + locationHtml + '</td>' +
+'<td class="time">' + time + '<br><span style="font-size:11px; color:#64748b">' + timeAgo(r.timestamp) + '</span></td>' +
+'</tr>';
 }).join('');
+}
+} catch (err) {
+console.error('Render error:', err);
+document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="empty">Error: ' + err.message + '</td></tr>';
 }
 }
 
 // Listen for sign-ins
-signinsRef.on('value', snap => {
+signinsRef.on('value', function(snap) {
 allRecords = [];
-snap.forEach(child => { const val = child.val(); if(val) allRecords.push({ id: child.key, ...val }); });
+snap.forEach(function(child) {
+const val = child.val();
+if (val) {
+allRecords.push({ id: child.key });
+Object.keys(val).forEach(function(key) {
+allRecords[allRecords.length - 1][key] = val[key];
+});
+}
+});
 render();
+}, function(error) {
+console.error('Signins error:', error);
+document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="empty">Database error: ' + error.message + '</td></tr>';
 });
 
 // Listen for status changes
-statusRef.on('value', snap => {
+statusRef.on('value', function(snap) {
 statusData = {};
-snap.forEach(child => { statusData[child.key] = child.val(); });
+snap.forEach(function(child) {
+statusData[child.key] = child.val();
+});
 render();
 });
 
-// Listen for operative profile changes (Training Matrix data)
-operativesRef.on('value', snap => {
+// Listen for operative profile changes
+operativesRef.on('value', function(snap) {
 operativesData = {};
-snap.forEach(child => { operativesData[child.key] = child.val(); });
+snap.forEach(function(child) {
+operativesData[child.key] = child.val();
+});
 render();
 });
 
@@ -268,98 +303,57 @@ document.getElementById('search').addEventListener('input', render);
 
 function exportCSV() {
 const today = todayStart();
-const();
-const data = allRecords data = allRecords.filter(r => r.filter(r => r.timestamp.timestamp && r.timestamp >= && r.timestamp >= today);
-today);
-if (data.length if (data.length === 0) === 0) { alert('No { alert('No records to export'); records to export'); return; }
-return; }
+const data = allRecords.filter(function(r) { return r.timestamp && r.timestamp >= today; });
+if (data.length === 0) {
+alert('No records to export');
+return;
+}
 
-let csv
-let csv = 'Date, = 'Date,Time,Name,Time,Name,Company,Phone,Company,Phone,Supervisor,Supervisor,Qualifications,QualQualifications,QualExpiry,MethodExpiry,Method,Action,Location,Action,Location,Lat,Lng,Lat,Lng\n';
-\n';
-data.sort data.sort((a, b((a, b) => a.timestamp) => a.timestamp - b.timestamp). - b.timestamp).forEach(r => {forEach(r => {
-const op
-const op = operativesData[r = operativesData[r.operativeId].operativeId] || {};
-|| {};
-const date = new const date = new Date(r.timestamp). Date(r.timestamp).toISOString().split('toISOString().split('T')[0];T')[0];
-const time
-const time = new Date(r = new Date(r.timestamp).toLocaleTimeString.timestamp).toLocaleTimeString();
-();
-const loc = r const loc = r.location ? r.location.location ? r.location.address || `${r.address || `${r.location.lat.location.lat},${r.location.lng},${r.location.lng}` : '';
-}` : '';
-const const lat = r.location lat = r.location ? r.location.lat ? r.location.lat : '';
-: '';
-const const lng = r.location lng = r.location ? r.location.lng ? r.location.lng : '';
+let csv = 'Date,Time,Name,Company,Phone,Supervisor,Qualifications,QualExpiry,Method,Action,Location,Lat,Lng\n';
+data.sort(function(a, b) { return a.timestamp - b.timestamp; }).forEach(function(r) {
+const op = operativesData[r.operativeId] || {};
+const date = new Date(r.timestamp).toISOString().split('T')[0];
+const time = new Date(r.timestamp).toLocaleTimeString();
+const loc = r.location ? r.location.address || (r.location.lat + ',' + r.location.lng) : '';
+const lat = r.location ? r.location.lat : '';
+const lng = r.location ? r.location.lng : '';
 
-: '';
-
-csv += `" csv += `"${date}","${date}","${${time}","${time}","${r.operativer.operativeName || ''}Name || ''}","${","${r.operativeCompanyr.operativeCompany || ''}"," || ''}","${op.phone ||${op.phone || ''}","${ ''}","${op.supervisor ||op.supervisor || ''}","${ ''}","${op.qualifications ||op.qualifications || ''} ''}","${op.qual","${op.qualExpiry || ''Expiry || ''}","${r}","${r.method.method || ''}"," || ''}","${r.action ||${r.action || ''}","${ ''}","${loc}","${loc}","${latlat}","${lng}","${lng}"\n`;}"\n`;
-
+csv += '"' + date + '","' + time + '","' + (r.operativeName || '') + '","' + (r.operativeCompany || '') + '","' + (op.phone || '') + '","' + (op.supervisor || '') + '","' + (op.qualifications || '') + '","' + (op.qualExpiry || '') + '","' + (r.method || '') + '","' + (r.action || '') + '","' + loc + '","' + lat + '","' + lng + '"\n';
 });
 
-});
-
-const blob = const blob = new Blob([csv new Blob([csv], { type:], { type: 'text/csv' 'text/csv' });
-const });
-const url = URL.createObject url = URL.createObjectURL(blob);
-constURL(blob);
-const a = document.createElement a = document.createElement('a'); a('a'); a.href = url;.href = url; a.download = ` a.download = `face-reader-matrixface-reader-matrix-${new Date-${new Date().toISOString().split().toISOString().split('T')[0('T')[0]}.csv`;]}.csv`; a.click();
+const blob = new Blob([csv], { type: 'text/csv' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'face-reader-matrix-' + new Date().toISOString().split('T')[0] + '.csv';
 a.click();
 }
 
-async function}
+async function clearToday() {
+if (!confirm('⚠️ Reset dashboard for demo? This will delete today\'s records and reset the live status.')) return;
 
-async function clearToday() { clearToday() {
-if (!
-if (!confirm('confirm('⚠️ Reset dashboard⚠️ Reset dashboard for demo? This for demo? This will delete today\' will delete today\'s records and resets records and reset the live status.' the live status.')) return;
-)) return;
+const today = todayStart();
+const updates = {};
 
-const today
-const today = = todayStart();
-todayStart();
-const updates = const updates = {};
-
-{};
-
-allRecords.forEach(r allRecords.forEach(r => {
-=> {
-if (r.timestamp if (r.timestamp && r.timestamp >= && r.timestamp >= today) {
-today) {
-updates['sign updates['signins/' + rins/' + r.id].id] = null;
-= null;
-}
+allRecords.forEach(function(r) {
+if (r.timestamp && r.timestamp >= today) {
+updates['signins/' + r.id] = null;
 }
 });
 
-});
-
-updates['status updates['status'] = null;'] = null;
-
-try
+updates['status'] = null;
 
 try {
-await {
-await db.ref('sites db.ref('sites/' + SITE_ID/' + SITE_ID).update(updates).update(updates););
-alert('
-alert('✅✅ Dashboard reset successfully! Dashboard reset successfully!');
-location');
+await db.ref('sites/' + SITE_ID).update(updates);
+alert('✅ Dashboard reset successfully!');
 location.reload();
-.reload();
-} catch ( } catch (err) {
-err) {
-alert('Error alert('Error: ' + err: ' + err.message);
-.message);
-}
-}
-
+} catch (err) {
+alert('Error: ' + err.message);
 }
 }
 
 render();
-</render();
-</script>
 </script>
 </body>
-</body>
-</htmlhtml>
+</html>
 
