@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Reader - Admin Panel</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+color:#fff;
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+min-height:100vh;
+position: relative;
+}
+body::before {
+content: '';
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background:
+radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 50%);
+pointer-events: none;
+z-index: 0;
+}
+.container { max-width:900px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
+header {
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:25px 0;
+margin-bottom:30px;
+border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+.logo {
+font-size:36px;
+font-weight:900;
+background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+letter-spacing: 2px;
+}
+.badge {
+background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+color:#fff;
+padding:8px 16px;
+border-radius:20px;
+font-size:12px;
+font-weight:700;
+text-transform: uppercase;
+letter-spacing: 2px;
+box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+.card {
+background: rgba(30, 41, 59, 0.8);
+backdrop-filter: blur(10px);
+padding:30px;
+border-radius:20px;
+margin-bottom:25px;
+border: 1px solid rgba(255,255,255,0.1);
+box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+h2 {
+margin:0 0 25px;
+font-size:20px;
+color:#f1f5f9;
+font-weight:700;
+}
+.input-group { margin-bottom:20px; }
+label { display:block; font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600; }
+input {
+width:100%;
+padding:14px 16px;
+border-radius:12px;
+border:2px solid rgba(255,255,255,0.1);
+background: rgba(15, 23, 42, 0.6);
+color:#fff;
+font-size:15px;
+transition: all 0.3s ease;
+}
+/* Fix for dark mode date picker icon */
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+input:focus {
+outline: none;
+border-color: #06b6d4;
+box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
+}
+.btn-group { display:flex; gap:12px; flex-wrap:wrap; margin-top:25px; }
+button {
+padding:14px 24px;
+border-radius:12px;
+border:none;
+font-weight:700;
+cursor:pointer;
+color:#fff;
+transition: all 0.3s ease;
+text-transform: uppercase;
+letter-spacing: 1px;
+font-size:14px;
+}
+.btn-save {
+background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+.btn-cancel {
+background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+}
+.btn-edit {
+background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+padding:10px 16px;
+font-size:12px;
+}
+.btn-delete {
+background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+padding:10px 16px;
+font-size:12px;
+}
+.btn-register {
+display:block;
+width:100%;
+background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+padding:20px;
+text-align:center;
+text-decoration:none;
+color:white;
+font-weight:700;
+border-radius:15px;
+margin-bottom:25px;
+box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+transition: all 0.3s ease;
+font-size:16px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.btn-register:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); }
+.operative-item {
+background: rgba(15, 23, 42, 0.6);
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+display:flex;
+justify-content:space-between;
+align-items:flex-start; /* Changed to flex-start so it handles multi-line details better */
+border: 1px solid rgba(255,255,255,0.05);
+transition: all 0.3s ease;
+}
+.operative-item:hover {
+transform: translateX(5px);
+border-color: rgba(6, 182, 212, 0.3);
+box-shadow: 0 5px 20px rgba(6, 182, 212, 0.1);
+}
+.name { font-weight:700; font-size:17px; color:#f1f5f9; margin-bottom:5px; }
+.details { font-size:13px; color:#94a3b8; line-height: 1.5; }
+.company { color:#f97316; font-weight:600; }
+.actions { display:flex; gap:10px; flex-shrink: 0; margin-left: 15px; }
+.status-msg {
+padding:16px 20px;
+border-radius:12px;
+text-align:center;
+font-weight:600;
+margin-bottom:25px;
+animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+from { opacity: 0; transform: translateY(-10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.success {
+background: rgba(6, 78, 59, 0.6);
+color:#34d399;
+border: 1px solid rgba(52, 211, 153, 0.3);
+display:block;
+}
+.error {
+background: rgba(127, 29, 29, 0.6);
+color:#f87171;
+border: 1px solid rgba(248, 113, 113, 0.3);
+display:block;
+}
+.footer {
+text-align:center;
+font-size:12px;
+color:#64748b;
+margin-top:40px;
+padding:25px 0;
+border-top: 1px solid rgba(255,255,255,0.1);
+}
+.empty { text-align:center; color:#64748b; padding:40px; font-size:15px; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="logo">FACE READER</div>
+<div class="badge">Admin Panel</div>
+</header>
+
+<a href="index.html" class="btn-register">📷 Go to Face Registration Page</a>
+
+<div id="statusMsg" class="status-msg" style="display:none;"></div>
+
+<div class="card">
+<h2 id="formTitle">➕ Add / Edit Operative</h2>
+<form id="operativeForm">
+<input type="hidden" id="operativeId">
+<div class="input-group">
+<label>Full Name *</label>
+<input type="text" id="name" placeholder="John Smith" required>
+</div>
+<div class="input-group">
+<label>Company / Employer *</label>
+<input type="text" id="company" placeholder="ABC Construction Ltd" required>
+</div>
+<div class="input-group">
+<label>Role / Job Title</label>
+<input type="text" id="role" placeholder="Electrician">
+</div>
+<div class="input-group">
+<label>Phone Number</label>
+<input type="tel" id="phone" placeholder="07700 900000">
+</div>
+<div class="input-group">
+<label>Direct Line Manager / Supervisor</label>
+<input type="text" id="supervisor" placeholder="Site Manager Name">
+</div>
+<div class="input-group">
+<label>Qualifications</label>
+<input type="text" id="qualifications" placeholder="e.g., CSCS Black Card, PASMA">
+</div>
+<div class="input-group">
+<label>Qualification Expiry Date</label>
+<input type="date" id="qualExpiry">
+</div>
+<div class="input-group">
+<label>QR Code ID (Optional)</label>
+<input type="text" id="qrCode" placeholder="For QR scanning fallback">
+</div>
+<div class="btn-group">
+<button type="submit" class="btn-save">💾 Save Details</button>
+<button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
+</div>
+</form>
+</div>
+
+<div class="card">
+<h2>👥 Registered Operatives (<span id="count">0</span>)</h2>
+<div id="operativeList">
+<div class="empty">Loading operatives...</div>
+</div>
+</div>
+
+<div class="footer">We Are A Team Together Ltd © 2026</div>
+</div>
+
+<script>
+const SITE_ID = "I";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
+authDomain: "signin-facereader.firebaseapp.com",
+databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "signin-facereader",
+storageBucket: "signin-facereader.firebasestorage.app",
+messagingSenderId: "815339415778",
+appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
+const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
+
+let operatives = {};
+const form = document.getElementById('operativeForm');
+const listEl = document.getElementById('operativeList');
+const statusMsg = document.getElementById('statusMsg');
+
+function showStatus(msg, type) {
+statusMsg.textContent = msg;
+statusMsg.className = 'status-msg ' + type;
+statusMsg.style.display = 'block';
+setTimeout(() => { statusMsg.style.display = 'none'; }, 4000);
+}
+
+function resetForm() {
+form.reset();
+document.getElementById('operativeId').value = '';
+document.getElementById('formTitle').textContent = '➕ Add / Edit Operative';
+}
+
+form.addEventListener('submit', async (e) => {
+e.preventDefault();
+const id = document.getElementById('operativeId').value;
+const data = {
+name: document.getElementById('name').value.trim(),
+company: document.getElementById('company').value.trim(),
+role: document.getElementById('role').value.trim(),
+phone: document.getElementById('phone').value.trim(),
+supervisor: document.getElementById('supervisor').value.trim(),
+qualifications: document.getElementById('qualifications').value.trim(),
+qualExpiry: document.getElementById('qualExpiry').value.trim(),
+qrCode: document.getElementById('qrCode').value.trim(),
+updatedAt: firebase.database.ServerValue.TIMESTAMP
+};
+try {
+if (id) {
+await operativesRef.child(id).update(data);
+showStatus('✅ Updated successfully', 'success');
+} else {
+data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+await operativesRef.push(data);
+showStatus('✅ Added! Use Face Registration to capture face', 'success');
+}
+resetForm();
+} catch (err) {
+showStatus('❌ Error: ' + err.message, 'error');
+}
+});
+
+function editOperative(id) {
+const o = operatives[id];
+document.getElementById('operativeId').value = id;
+document.getElementById('name').value = o.name || '';
+document.getElementById('company').value = o.company || '';
+document.getElementById('role').value = o.role || '';
+document.getElementById('phone').value = o.phone || '';
+document.getElementById('supervisor').value = o.supervisor || '';
+document.getElementById('qualifications').value = o.qualifications || '';
+document.getElementById('qualExpiry').value = o.qualExpiry || '';
+document.getElementById('qrCode').value = o.qrCode || '';
+document.getElementById('formTitle').textContent = '✏️ Edit: ' + (o.name || 'Unnamed');
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteOperative(id) {
+if (!confirm('⚠️ Delete this operative and their face data? This cannot be undone.')) return;
+try {
+await operativesRef.child(id).remove();
+await faceDescriptorsRef.child(id).remove();
+showStatus('✅ Deleted successfully', 'success');
+} catch (err) {
+showStatus('❌ Error: ' + err.message, 'error');
+}
+}
+
+function render() {
+const list = Object.entries(operatives).map(([id, o]) => ({ id, ...o }));
+document.getElementById('count').textContent = list.length;
+
+if (list.length === 0) {
+listEl.innerHTML = '<div class="empty">No operatives registered yet</div>';
+return;
+}
+
+list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+listEl.innerHTML = list.map(o => `
+<div class="operative-item">
+<div style="flex:1;">
+<div class="name">${o.name || 'Unnamed'}</div>
+<div class="details">
+<span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
+${o.phone ? '<br>📞 ' + o.phone : ''}
+${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
+${o.qualifications ? '<br>📜 Quals: ' + o.qualifications : ''}
+${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
+${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
+</div>
+</div>
+<div class="actions">
+<button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
+<button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑 Delete</button>
+</div>
+</div>
+`).join('');
+}
+
+operativesRef.on('value', snap => {
+operatives = {};
+snap.forEach(child => { operatives[child.key] = child.val(); });
+render();
+});
+</script>
+</body>
+</html>
+

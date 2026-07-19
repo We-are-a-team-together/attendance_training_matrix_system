@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Reader - Register</title>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f172a; color:#fff; font-family:Arial,sans-serif; min-height:100vh; }
+.container { max-width:600px; margin:0 auto; padding:30px 20px; }
+.logo { text-align:center; font-size:32px; font-weight:900; margin-bottom:10px; background: linear-gradient(135deg, #06b6d4, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.tagline { text-align:center; color:#94a3b8; margin-bottom:30px; }
+.card { background:#1e293b; padding:25px; border-radius:15px; margin-bottom:20px; }
+h2 { margin-bottom:20px; color:#f1f5f9; }
+input { width:100%; padding:12px; margin:8px 0 20px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:#fff; }
+/* Ensures the date picker icon is visible on dark background */
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+button { width:100%; padding:16px; margin:10px 0; border-radius:10px; border:none; font-weight:700; cursor:pointer; color:#fff; font-size:16px; }
+.btn-start { background:#0891b2; }
+.btn-start:disabled { background:#475569; opacity:0.5; }
+.btn-capture { background:#10b981; display:none; font-size:18px; }
+.status { padding:14px; border-radius:10px; text-align:center; margin-bottom:20px; font-weight:600; }
+.status-info { background:#1e3a8a; color:#93c5fd; }
+.status-success { background:#064e3b; color:#34d399; }
+.status-error { background:#7f1d1d; color:#f87171; }
+#video { width:100%; border-radius:12px; display:none; margin:15px 0; border:3px solid #334155; }
+#video.ready { border-color:#10b981; box-shadow:0 0 20px rgba(16,185,129,0.5); }
+.footer { text-align:center; font-size:11px; color:#64748b; margin-top:20px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="logo">FACE READER</div>
+<div class="tagline">Attendance System</div>
+
+<div id="status" class="status status-info">Loading...</div>
+
+<div class="card">
+<h2> Register Operative</h2>
+<input type="text" id="name" placeholder="Full Name *" required>
+<input type="text" id="company" placeholder="Company *" required>
+<input type="text" id="role" placeholder="Role/Job Title">
+<input type="tel" id="phone" placeholder="Phone Number">
+<input type="text" id="supervisor" placeholder="Direct Line Manager / Supervisor">
+<input type="text" id="qualifications" placeholder="Qualifications (e.g., CSCS, First Aid)">
+<input type="date" id="qualExpiry" title="Qualification Expiry Date">
+<input type="text" id="qrCode" placeholder="QR Code ID (Optional)">
+
+<button class="btn-start" id="btnStart" onclick="startCamera()" disabled> Start Camera</button>
+<video id="video" autoplay muted playsinline></video>
+<button class="btn-capture" id="btnCapture" onclick="captureFace()">✅ CAPTURE FACE</button>
+</div>
+
+<div class="footer">We Are A Team Together Ltd © 2026</div>
+</div>
+
+<script>
+const SITE_ID = "I";
+const firebaseConfig = {
+apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
+authDomain: "signin-facereader.firebaseapp.com",
+databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "signin-facereader",
+storageBucket: "signin-facereader.firebasestorage.app",
+messagingSenderId: "815339415778",
+appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
+const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
+
+let videoStream = null;
+let modelsLoaded = false;
+
+async function loadModels() {
+try {
+setStatus('Loading AI models...', 'info');
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+setStatus('Loading landmarks...', 'info');
+await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+setStatus('Loading recognition...', 'info');
+await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+modelsLoaded = true;
+setStatus('✅ Ready! Click Start Camera', 'success');
+document.getElementById('btnStart').disabled = false;
+} catch (err) {
+setStatus('❌ Error loading models: ' + err.message, 'error');
+}
+}
+
+function setStatus(msg, type) {
+const statusEl = document.getElementById('status');
+statusEl.textContent = msg;
+statusEl.className = 'status status-' + type;
+}
+
+async function startCamera() {
+const name = document.getElementById('name').value.trim();
+const company = document.getElementById('company').value.trim();
+
+if (!name || !company) {
+setStatus('⚠️ Fill in Name and Company', 'error');
+return;
+}
+
+try {
+setStatus('📷 Starting camera...', 'info');
+videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+
+const video = document.getElementById('video');
+video.srcObject = videoStream;
+video.style.display = 'block';
+
+document.getElementById('btnStart').style.display = 'none';
+document.getElementById('btnCapture').style.display = 'block';
+
+setStatus('👤 Position face, then click CAPTURE', 'info');
+
+// Monitor detection
+setInterval(async () => {
+if (video.readyState === 4) {
+try {
+const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.2 }));
+if (detection) {
+video.classList.add('ready');
+} else {
+video.classList.remove('ready');
+}
+} catch(e) {}
+}
+}, 1000);
+
+} catch (err) {
+setStatus('❌ Camera error: ' + err.message, 'error');
+}
+}
+
+async function captureFace() {
+const video = document.getElementById('video');
+const name = document.getElementById('name').value.trim();
+const company = document.getElementById('company').value.trim();
+const role = document.getElementById('role').value.trim();
+const phone = document.getElementById('phone').value.trim();
+const supervisor = document.getElementById('supervisor').value.trim();
+const qualifications = document.getElementById('qualifications').value.trim();
+const qualExpiry = document.getElementById('qualExpiry').value.trim();
+const qrCode = document.getElementById('qrCode').value.trim();
+
+// Step 1
+setStatus('Step 1: Preparing camera...', 'info');
+
+try {
+// Ensure video is playing
+await video.play();
+
+// Step 2
+setStatus('Step 2: Detecting face...', 'info');
+
+const detection = await faceapi.detectSingleFace(
+video,
+new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.2 })
+);
+
+if (!detection) {
+setStatus('⚠️ No face detected! Try better lighting', 'error');
+return;
+}
+
+// Step 3
+setStatus('Step 3: Getting face landmarks...', 'info');
+const landmarks = await faceapi.detectFaceLandmarks(video, detection);
+
+// Step 4
+setStatus('Step 4: Getting face descriptor...', 'info');
+const descriptor = await faceapi.computeFaceDescriptor(video, landmarks);
+
+// Step 5
+setStatus('Step 5: Saving to database...', 'info');
+
+const faceDescriptor = Array.from(descriptor);
+const newRef = operativesRef.push();
+const id = newRef.key;
+
+// Save ALL text fields to Firebase (No images stored)
+await newRef.set({
+name,
+company,
+role,
+phone,
+supervisor,
+qualifications,
+qualExpiry,
+qrCode,
+createdAt: firebase.database.ServerValue.TIMESTAMP
+});
+await faceDescriptorsRef.child(id).set({ descriptor: faceDescriptor, name, company });
+
+// Step 6
+setStatus('✅ Successfully registered: ' + name, 'success');
+
+if (videoStream) {
+videoStream.getTracks().forEach(t => t.stop());
+}
+
+video.style.display = 'none';
+document.getElementById('btnStart').style.display = 'block';
+document.getElementById('btnCapture').style.display = 'none';
+
+// Clear all fields for the next person
+document.getElementById('name').value = '';
+document.getElementById('company').value = '';
+document.getElementById('role').value = '';
+document.getElementById('phone').value = '';
+document.getElementById('supervisor').value = '';
+document.getElementById('qualifications').value = '';
+document.getElementById('qualExpiry').value = '';
+document.getElementById('qrCode').value = '';
+
+setTimeout(() => {
+setStatus('✅ Ready! Click Start Camera', 'success');
+}, 3000);
+
+} catch (err) {
+console.error('Capture error:', err);
+setStatus('❌ Error at Step: ' + err.message, 'error');
+}
+}
+
+loadModels();
+</script>
+</body>
+</html>
+
