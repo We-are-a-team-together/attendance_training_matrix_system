@@ -414,7 +414,7 @@ showStatus('❌ Error', 'error');
 }
 
 function findBestMatch(inputDescriptor) {
-const THRESHOLD = 0.65;
+const THRESHOLD = 0.75;
 for (const [id, data] of Object.entries(faceDescriptors)) {
 const storedDescriptor = new Float32Array(data.descriptor);
 const distance = faceapi.euclideanDistance(inputDescriptor, storedDescriptor);
