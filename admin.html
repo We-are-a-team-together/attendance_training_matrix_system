@@ -81,7 +81,6 @@ color:#fff;
 font-size:15px;
 transition: all 0.3s ease;
 }
-/* Fix for dark mode date picker icon */
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 input:focus {
 outline: none;
@@ -146,7 +145,7 @@ border-radius:15px;
 margin-bottom:15px;
 display:flex;
 justify-content:space-between;
-align-items:flex-start; /* Changed to flex-start so it handles multi-line details better */
+align-items:flex-start;
 border: 1px solid rgba(255,255,255,0.05);
 transition: all 0.3s ease;
 }
@@ -211,27 +210,27 @@ border-top: 1px solid rgba(255,255,255,0.1);
 <input type="hidden" id="operativeId">
 <div class="input-group">
 <label>Full Name *</label>
-<input type="text" id="name" placeholder="John Smith" required>
+<input type="text" id="name" placeholder="" required>
 </div>
 <div class="input-group">
 <label>Company / Employer *</label>
-<input type="text" id="company" placeholder="ABC Construction Ltd" required>
+<input type="text" id="company" placeholder="" required>
 </div>
 <div class="input-group">
 <label>Role / Job Title</label>
-<input type="text" id="role" placeholder="Electrician">
+<input type="text" id="role" placeholder="">
 </div>
 <div class="input-group">
 <label>Phone Number</label>
-<input type="tel" id="phone" placeholder="07700 900000">
+<input type="tel" id="phone" placeholder="">
 </div>
 <div class="input-group">
 <label>Direct Line Manager / Supervisor</label>
-<input type="text" id="supervisor" placeholder="Site Manager Name">
+<input type="text" id="supervisor" placeholder="">
 </div>
 <div class="input-group">
 <label>Qualifications</label>
-<input type="text" id="qualifications" placeholder="e.g., CSCS Black Card, PASMA">
+<input type="text" id="qualifications" placeholder="">
 </div>
 <div class="input-group">
 <label>Qualification Expiry Date</label>
@@ -239,7 +238,7 @@ border-top: 1px solid rgba(255,255,255,0.1);
 </div>
 <div class="input-group">
 <label>QR Code ID (Optional)</label>
-<input type="text" id="qrCode" placeholder="For QR scanning fallback">
+<input type="text" id="qrCode" placeholder="">
 </div>
 <div class="btn-group">
 <button type="submit" class="btn-save">💾 Save Details</button>
@@ -365,16 +364,16 @@ listEl.innerHTML = list.map(o => `
 <div class="name">${o.name || 'Unnamed'}</div>
 <div class="details">
 <span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
-${o.phone ? '<br>📞 ' + o.phone : ''}
-${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
-${o.qualifications ? '<br>📜 Quals: ' + o.qualifications : ''}
+${o.phone ? '<br> ' + o.phone : ''}
+${o.supervisor ? '<br> Supervisor: ' + o.supervisor : ''}
+${o.qualifications ? '<br> Quals: ' + o.qualifications : ''}
 ${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
 ${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
 </div>
 </div>
 <div class="actions">
 <button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
-<button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑 Delete</button>
+<button class="btn-delete" onclick="deleteOperative('${o.id}')"> Delete</button>
 </div>
 </div>
 `).join('');
