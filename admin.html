@@ -3,19 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader - Admin Panel</title>
+<title>Face Reader Premium - Admin Panel</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-:root { --primary-color: #06b6d4; --secondary-color: #f97316; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; position: relative; }
 body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 50%); pointer-events: none; z-index: 0; }
 .container { max-width:900px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
 header { display:flex; justify-content:space-between; align-items:center; padding:25px 0; margin-bottom:30px; border-bottom: 2px solid rgba(255,255,255,0.1); }
-.logo-container { display: flex; align-items: center; gap: 15px; }
-.logo { font-size:36px; font-weight:900; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; display: flex; align-items: center; }
-.logo img { max-height: 60px; width: auto; -webkit-text-fill-color: initial; }
+.logo { font-size:36px; font-weight:900; background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
 .badge { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:#fff; padding:8px 16px; border-radius:20px; font-size:12px; font-weight:700; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
 .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding:30px; border-radius:20px; margin-bottom:25px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
 h2 { margin:0 0 25px; font-size:20px; color:#f1f5f9; font-weight:700; }
@@ -23,20 +20,21 @@ h2 { margin:0 0 25px; font-size:20px; color:#f1f5f9; font-weight:700; }
 label { display:block; font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600; }
 input { width:100%; padding:14px 16px; border-radius:12px; border:2px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6); color:#fff; font-size:15px; transition: all 0.3s ease; }
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1); }
+input:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1); }
 .btn-group { display:flex; gap:12px; flex-wrap:wrap; margin-top:25px; }
 button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cursor:pointer; color:#fff; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; font-size:14px; }
 .btn-save { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
 .btn-cancel { background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3); }
-.btn-edit { background: linear-gradient(135deg, var(--primary-color), #0891b2 100%); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3); padding:10px 16px; font-size:12px; }
+.btn-edit { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3); padding:10px 16px; font-size:12px; }
 .btn-delete { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); padding:10px 16px; font-size:12px; }
 .btn-register { display:block; width:100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding:20px; text-align:center; text-decoration:none; color:white; font-weight:700; border-radius:15px; margin-bottom:25px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; font-size:16px; text-transform: uppercase; letter-spacing: 1px; }
 .btn-register:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); }
 .operative-item { background: rgba(15, 23, 42, 0.6); padding:20px; border-radius:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:flex-start; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; }
-.operative-item:hover { transform: translateX(5px); border-color: var(--primary-color); box-shadow: 0 5px 20px rgba(6, 182, 212, 0.1); }
+.operative-item:hover { transform: translateX(5px); border-color: rgba(6, 182, 212, 0.3); box-shadow: 0 5px 20px rgba(6, 182, 212, 0.1); }
 .name { font-weight:700; font-size:17px; color:#f1f5f9; margin-bottom:5px; }
 .details { font-size:13px; color:#94a3b8; line-height: 1.5; }
-.company { color:var(--secondary-color); font-weight:600; }
+.company { color:#f97316; font-weight:600; }
+.location { color:#a855f7; font-weight:600; }
 .actions { display:flex; gap:10px; flex-shrink: 0; margin-left: 15px; }
 .status-msg { padding:16px 20px; border-radius:12px; text-align:center; font-weight:600; margin-bottom:25px; animation: slideIn 0.3s ease; }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -49,12 +47,10 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <body>
 <div class="container">
 <header>
-<div class="logo-container">
-<div class="logo" id="brandLogo">FACE READER</div>
-</div>
+<div class="logo">FACE READER PREMIUM</div>
 <div class="badge">Admin Panel</div>
 </header>
-<a href="index.html" class="btn-register">📷 Go to Face Registration Page</a>
+<a href="index.html" class="btn-register"> Go to Face Registration Page</a>
 <div id="statusMsg" class="status-msg" style="display:none;"></div>
 <div class="card">
 <h2 id="formTitle">➕ Add / Edit Operative</h2>
@@ -62,6 +58,7 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <input type="hidden" id="operativeId">
 <div class="input-group"><label>Full Name *</label><input type="text" id="name" placeholder="" required></div>
 <div class="input-group"><label>Company / Employer *</label><input type="text" id="company" placeholder="" required></div>
+<div class="input-group"><label>Assigned Location *</label><input type="text" id="assignedLocation" placeholder="" required></div>
 <div class="input-group"><label>Role / Job Title</label><input type="text" id="role" placeholder=""></div>
 <div class="input-group"><label>Phone Number</label><input type="tel" id="phone" placeholder=""></div>
 <div class="input-group"><label>Direct Line Manager / Supervisor</label><input type="text" id="supervisor" placeholder=""></div>
@@ -75,10 +72,10 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 </form>
 </div>
 <div class="card">
-<h2>👥 Registered Operatives (<span id="count">0</span>)</h2>
+<h2> Registered Operatives (<span id="count">0</span>)</h2>
 <div id="operativeList"><div class="empty">Loading operatives...</div></div>
 </div>
-<div class="footer" id="brandFooterText">We Are A Team Together Ltd © 2026</div>
+<div class="footer">We are a team together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
@@ -95,7 +92,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
 const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
-const settingsRef = db.ref('settings/branding');
 let operatives = {};
 const form = document.getElementById('operativeForm');
 const listEl = document.getElementById('operativeList');
@@ -105,7 +101,7 @@ function resetForm() { form.reset(); document.getElementById('operativeId').valu
 form.addEventListener('submit', async (e) => {
 e.preventDefault();
 const id = document.getElementById('operativeId').value;
-const data = { name: document.getElementById('name').value.trim(), company: document.getElementById('company').value.trim(), role: document.getElementById('role').value.trim(), phone: document.getElementById('phone').value.trim(), supervisor: document.getElementById('supervisor').value.trim(), qualifications: document.getElementById('qualifications').value.trim(), qualExpiry: document.getElementById('qualExpiry').value.trim(), qrCode: document.getElementById('qrCode').value.trim(), updatedAt: firebase.database.ServerValue.TIMESTAMP };
+const data = { name: document.getElementById('name').value.trim(), company: document.getElementById('company').value.trim(), assignedLocation: document.getElementById('assignedLocation').value.trim(), role: document.getElementById('role').value.trim(), phone: document.getElementById('phone').value.trim(), supervisor: document.getElementById('supervisor').value.trim(), qualifications: document.getElementById('qualifications').value.trim(), qualExpiry: document.getElementById('qualExpiry').value.trim(), qrCode: document.getElementById('qrCode').value.trim(), updatedAt: firebase.database.ServerValue.TIMESTAMP };
 try {
 if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); }
 else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); }
@@ -117,6 +113,7 @@ const o = operatives[id];
 document.getElementById('operativeId').value = id;
 document.getElementById('name').value = o.name || '';
 document.getElementById('company').value = o.company || '';
+document.getElementById('assignedLocation').value = o.assignedLocation || '';
 document.getElementById('role').value = o.role || '';
 document.getElementById('phone').value = o.phone || '';
 document.getElementById('supervisor').value = o.supervisor || '';
@@ -141,7 +138,9 @@ listEl.innerHTML = list.map(o => `
 <div style="flex:1;">
 <div class="name">${o.name || 'Unnamed'}</div>
 <div class="details">
-<span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
+<span class="company">${o.company || 'No Company'}</span> • 
+<span class="location">📍 ${o.assignedLocation || 'Unassigned'}</span><br>
+${o.role || 'No role'}
 ${o.phone ? '<br>📞 ' + o.phone : ''}
 ${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
 ${o.qualifications ? '<br>🎓 Quals: ' + o.qualifications : ''}
@@ -151,27 +150,12 @@ ${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
 </div>
 <div class="actions">
 <button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
-<button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑 Delete</button>
+<button class="btn-delete" onclick="deleteOperative('${o.id}')"> Delete</button>
 </div>
 </div>
 `).join('');
 }
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); render(); });
-
-// BRANDING LISTENER
-function applyBranding(data) {
-if (!data) return;
-document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
-document.documentElement.style.setProperty('--secondary-color', data.color2 || '#f97316');
-const logoEl = document.getElementById('brandLogo');
-if (logoEl) {
-if (data.logoUrl) { logoEl.innerHTML = '<img src="' + data.logoUrl + '" alt="Logo">'; }
-else { logoEl.textContent = data.name || 'FACE READER'; }
-}
-const footerEl = document.getElementById('brandFooterText');
-if (footerEl) footerEl.textContent = data.footer || 'We Are A Team Together Ltd © 2026';
-}
-settingsRef.on('value', function(snap) { applyBranding(snap.val()); });
 </script>
 </body>
 </html>
