@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader Premium - Register Operative</title>
+<title>Face Reader - Register Operative</title>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -39,9 +39,7 @@ button { width:100%; padding:16px; margin:10px 0; border-radius:12px; border:non
 </head>
 <body>
 <div class="container">
-<header>
-<div class="logo">FACE READER PREMIUM</div>
-</header>
+<header><div class="logo">FACE READER</div></header>
 <div id="statusBox" class="status-box status-loading">Loading AI models<span class="loading-dots"></span></div>
 <div class="card">
 <h2>Register New Operative</h2>
@@ -58,119 +56,33 @@ button { width:100%; padding:16px; margin:10px 0; border-radius:12px; border:non
 <video id="video" autoplay muted playsinline></video>
 <button class="btn-capture" id="btnCapture" onclick="captureFace()">CAPTURE FACE</button>
 </div>
-<div class="footer">We are a team together Ltd © 2026</div>
+<div class="footer">We Are A Team Together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
-const firebaseConfig = {
-apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
-authDomain: "signin-facereader.firebaseapp.com",
-databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
-projectId: "signin-facereader",
-storageBucket: "signin-facereader.firebasestorage.app",
-messagingSenderId: "815339415778",
-appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
-};
+const firebaseConfig = { apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw", authDomain: "signin-facereader.firebaseapp.com", databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app", projectId: "signin-facereader", storageBucket: "signin-facereader.firebasestorage.app", messagingSenderId: "815339415778", appId: "1:815339415778:web:d4b131f38c8d6a42f716bb" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
 const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
-let videoStream = null;
-let modelsLoaded = false;
-let isCameraActive = false;
-const statusBox = document.getElementById('statusBox');
-const btnCamera = document.getElementById('btnCamera');
-const btnCapture = document.getElementById('btnCapture');
-const video = document.getElementById('video');
+let videoStream = null, modelsLoaded = false, isCameraActive = false;
+const statusBox = document.getElementById('statusBox'), btnCamera = document.getElementById('btnCamera'), btnCapture = document.getElementById('btnCapture'), video = document.getElementById('video');
 function setStatus(msg, type) { statusBox.textContent = msg; statusBox.className = 'status-box status-' + type; }
 async function loadModels() {
-try {
-setStatus('Loading AI models...', 'loading');
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
-await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-modelsLoaded = true;
-setStatus('Ready! Fill in details and click Open Camera', 'ready');
-btnCamera.disabled = false;
-} catch (err) { console.error('Model loading error:', err); setStatus('Error loading models: ' + err.message, 'error'); }
+try { setStatus('Loading AI models...', 'loading'); const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model'; await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL); await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL); await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL); modelsLoaded = true; setStatus('Ready! Fill in details and click Open Camera', 'ready'); btnCamera.disabled = false; } catch (err) { setStatus('Error loading models: ' + err.message, 'error'); }
 }
 async function startCamera() {
-const name = document.getElementById('name').value.trim();
-const company = document.getElementById('company').value.trim();
-const location = document.getElementById('assignedLocation').value.trim();
-if (!name || !company || !location) { setStatus('Please enter Name, Company and Assigned Location first', 'error'); if (!name) document.getElementById('name').focus(); else if (!company) document.getElementById('company').focus(); else document.getElementById('assignedLocation').focus(); return; }
-try {
-setStatus('Starting camera...', 'scanning');
-videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
-video.srcObject = videoStream;
-video.style.display = 'block';
-await new Promise((resolve) => { video.onloadedmetadata = () => { video.play(); resolve(); }; });
-video.classList.add('active');
-btnCamera.style.display = 'none';
-btnCapture.style.display = 'block';
-isCameraActive = true;
-setStatus('Position your face clearly, then click CAPTURE FACE', 'scanning');
-startFaceDetectionPreview();
-} catch (err) { console.error('Camera error:', err); setStatus('Camera access denied. Please allow camera permissions.', 'error'); }
+const name = document.getElementById('name').value.trim(), company = document.getElementById('company').value.trim(), location = document.getElementById('assignedLocation').value.trim();
+if (!name || !company || !location) { setStatus('Please enter Name, Company and Location first', 'error'); if (!name) document.getElementById('name').focus(); else if (!company) document.getElementById('company').focus(); else document.getElementById('assignedLocation').focus(); return; }
+try { setStatus('Starting camera...', 'scanning'); videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } }); video.srcObject = videoStream; video.style.display = 'block'; await new Promise((resolve) => { video.onloadedmetadata = () => { video.play(); resolve(); }; }); video.classList.add('active'); btnCamera.style.display = 'none'; btnCapture.style.display = 'block'; isCameraActive = true; setStatus('Position your face clearly, then click CAPTURE FACE', 'scanning'); startFaceDetectionPreview(); } catch (err) { setStatus('Camera access denied. Please allow camera permissions.', 'error'); }
 }
-async function startFaceDetectionPreview() {
-if (!isCameraActive) return;
-try {
-const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 }));
-if (detection) { setStatus('Face detected! Click CAPTURE FACE to register', 'ready'); }
-else { setStatus('Position your face in the camera', 'scanning'); }
-} catch (err) { console.log('Detection preview error:', err); }
-if (isCameraActive) { setTimeout(startFaceDetectionPreview, 1000); }
-}
+async function startFaceDetectionPreview() { if (!isCameraActive) return; try { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 })); if (detection) setStatus('Face detected! Click CAPTURE FACE to register', 'ready'); else setStatus('Position your face in the camera', 'scanning'); } catch (err) {} if (isCameraActive) setTimeout(startFaceDetectionPreview, 1000); }
 async function captureFace() {
-if (!isCameraActive) { setStatus('Camera not active. Please start camera first.', 'error'); return; }
-setStatus('Capturing face...', 'scanning');
-btnCapture.disabled = true;
-try {
-if (video.paused || video.ended) { await video.play(); }
-await new Promise(resolve => setTimeout(resolve, 500));
-const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-if (!detection) { setStatus('No face detected! Try better lighting and position.', 'error'); btnCapture.disabled = false; return; }
-const faceDescriptor = Array.from(detection.descriptor);
-const name = document.getElementById('name').value.trim();
-const company = document.getElementById('company').value.trim();
-const assignedLocation = document.getElementById('assignedLocation').value.trim();
-const role = document.getElementById('role').value.trim();
-const phone = document.getElementById('phone').value.trim();
-const supervisor = document.getElementById('supervisor').value.trim();
-const qualifications = document.getElementById('qualifications').value.trim();
-const qualExpiry = document.getElementById('qualExpiry').value.trim();
-const qrCode = document.getElementById('qrCode').value.trim();
-setStatus('Saving to database...', 'scanning');
-const newRef = operativesRef.push();
-const id = newRef.key;
-const operativeData = { name, company, assignedLocation, role, phone, supervisor, qualifications, qualExpiry, qrCode, createdAt: firebase.database.ServerValue.TIMESTAMP };
-await newRef.set(operativeData);
-await faceDescriptorsRef.child(id).set({ descriptor: faceDescriptor, name, company, assignedLocation });
-setStatus('Successfully registered: ' + name, 'ready');
-stopCamera();
-document.getElementById('name').value = '';
-document.getElementById('company').value = '';
-document.getElementById('assignedLocation').value = '';
-document.getElementById('role').value = '';
-document.getElementById('phone').value = '';
-document.getElementById('supervisor').value = '';
-document.getElementById('qualifications').value = '';
-document.getElementById('qualExpiry').value = '';
-document.getElementById('qrCode').value = '';
-btnCamera.style.display = 'block';
-btnCapture.style.display = 'none';
-btnCapture.disabled = false;
-setTimeout(() => { setStatus('Ready! Fill in details and click Open Camera', 'ready'); }, 3000);
-} catch (err) { console.error('Capture error:', err); setStatus('Error: ' + err.message, 'error'); btnCapture.disabled = false; }
+if (!isCameraActive) { setStatus('Camera not active.', 'error'); return; }
+setStatus('Capturing face...', 'scanning'); btnCapture.disabled = true;
+try { if (video.paused || video.ended) await video.play(); await new Promise(resolve => setTimeout(resolve, 500)); const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor(); if (!detection) { setStatus('No face detected!', 'error'); btnCapture.disabled = false; return; } const faceDescriptor = Array.from(detection.descriptor); const name = document.getElementById('name').value.trim(), company = document.getElementById('company').value.trim(), assignedLocation = document.getElementById('assignedLocation').value.trim(), role = document.getElementById('role').value.trim(), phone = document.getElementById('phone').value.trim(), supervisor = document.getElementById('supervisor').value.trim(), qualifications = document.getElementById('qualifications').value.trim(), qualExpiry = document.getElementById('qualExpiry').value.trim(), qrCode = document.getElementById('qrCode').value.trim(); setStatus('Saving to database...', 'scanning'); const newRef = operativesRef.push(); const id = newRef.key; await newRef.set({ name, company, assignedLocation, role, phone, supervisor, qualifications, qualExpiry, qrCode, createdAt: firebase.database.ServerValue.TIMESTAMP }); await faceDescriptorsRef.child(id).set({ descriptor: faceDescriptor, name, company, assignedLocation }); setStatus('Successfully registered: ' + name, 'ready'); stopCamera(); document.getElementById('name').value = ''; document.getElementById('company').value = ''; document.getElementById('assignedLocation').value = ''; document.getElementById('role').value = ''; document.getElementById('phone').value = ''; document.getElementById('supervisor').value = ''; document.getElementById('qualifications').value = ''; document.getElementById('qualExpiry').value = ''; document.getElementById('qrCode').value = ''; btnCamera.style.display = 'block'; btnCapture.style.display = 'none'; btnCapture.disabled = false; setTimeout(() => setStatus('Ready! Fill in details and click Open Camera', 'ready'), 3000); } catch (err) { setStatus('Error: ' + err.message, 'error'); btnCapture.disabled = false; }
 }
-function stopCamera() {
-if (videoStream) { videoStream.getTracks().forEach(track => track.stop()); videoStream = null; }
-video.style.display = 'none';
-video.classList.remove('active');
-isCameraActive = false;
-}
+function stopCamera() { if (videoStream) { videoStream.getTracks().forEach(track => track.stop()); videoStream = null; } video.style.display = 'none'; video.classList.remove('active'); isCameraActive = false; }
 loadModels();
 </script>
 </body>
