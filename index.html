@@ -8,203 +8,61 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
+:root { --primary-color: #06b6d4; --secondary-color: #f97316; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-color:#fff;
-font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-min-height:100vh;
-padding: 20px;
-}
+body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; padding: 20px; }
 .container { max-width:600px; margin:0 auto; }
-header {
-text-align:center;
-padding:30px 0;
-margin-bottom:20px;
-border-bottom: 2px solid rgba(255,255,255,0.1);
-}
-.logo {
-font-size:36px;
-font-weight:900;
-background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-letter-spacing: 2px;
-}
-.card {
-background: rgba(30, 41, 59, 0.8);
-padding:30px;
-border-radius:20px;
-margin-bottom:20px;
-border: 1px solid rgba(255,255,255,0.1);
-}
-h2 {
-margin-bottom:25px;
-color:#f1f5f9;
-font-size:20px;
-}
-.label {
-display:block;
-font-size:12px;
-color:#94a3b8;
-text-transform:uppercase;
-letter-spacing:1px;
-margin-bottom:8px;
-font-weight:600;
-}
-input[type="text"], input[type="tel"], input[type="date"] {
-width:100%;
-padding:14px;
-margin-bottom:20px;
-border-radius:12px;
-border:2px solid rgba(255,255,255,0.1);
-background: rgba(15, 23, 42, 0.6);
-color:#fff;
-font-size:15px;
-transition: all 0.3s;
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-filter: invert(1);
-cursor: pointer;
-}
-input:focus {
-outline: none;
-border-color: #06b6d4;
-box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
-}
-.status-box {
-padding:16px;
-border-radius:12px;
-text-align:center;
-font-weight:600;
-margin-bottom:25px;
-font-size:15px;
-}
-.status-loading {
-background: rgba(30, 58, 138, 0.6);
-color:#93c5fd;
-border: 1px solid rgba(147, 197, 253, 0.3);
-}
-.status-ready {
-background: rgba(6, 78, 59, 0.6);
-color:#34d399;
-border: 1px solid rgba(52, 211, 153, 0.3);
-}
-.status-error {
-background: rgba(127, 29, 29, 0.6);
-color:#f87171;
-border: 1px solid rgba(248, 113, 113, 0.3);
-}
-.status-scanning {
-background: rgba(254, 243, 199, 0.2);
-color:#fbbf24;
-border: 1px solid rgba(251, 191, 36, 0.3);
-}
-button {
-width:100%;
-padding:16px;
-margin:10px 0;
-border-radius:12px;
-border:none;
-font-weight:700;
-cursor:pointer;
-color:#fff;
-font-size:16px;
-transition: all 0.3s;
-text-transform: uppercase;
-letter-spacing: 1px;
-}
-.btn-camera {
-background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
-}
-.btn-camera:disabled {
-background:#475569;
-opacity:0.5;
-cursor:not-allowed;
-box-shadow: none;
-}
-.btn-camera:hover:not(:disabled) {
-transform: translateY(-2px);
-box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
-}
-.btn-capture {
-background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-display:none;
-font-size:18px;
-}
-.btn-capture:hover {
-transform: translateY(-2px);
-box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-}
-#video {
-width:100%;
-border-radius:15px;
-display:none;
-margin:20px 0;
-border: 3px solid rgba(6, 182, 212, 0.5);
-box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-#video.active {
-border-color: #10b981;
-box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
-}
-.footer {
-text-align:center;
-font-size:12px;
-color:#64748b;
-margin-top:30px;
-padding:20px 0;
-border-top: 1px solid rgba(255,255,255,0.1);
-}
-.loading-dots::after {
-content: '';
-animation: dots 1.5s steps(4, end) infinite;
-}
-@keyframes dots {
-0%, 20% { content: ''; }
-40% { content: '.'; }
-60% { content: '..'; }
-80%, 100% { content: '...'; }
-}
+header { text-align:center; padding:30px 0; margin-bottom:20px; border-bottom: 2px solid rgba(255,255,255,0.1); }
+.logo-container { display: flex; justify-content: center; align-items: center; }
+.logo { font-size:36px; font-weight:900; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; display: flex; align-items: center; }
+.logo img { max-height: 60px; width: auto; -webkit-text-fill-color: initial; }
+.card { background: rgba(30, 41, 59, 0.8); padding:30px; border-radius:20px; margin-bottom:20px; border: 1px solid rgba(255,255,255,0.1); }
+h2 { margin-bottom:25px; color:#f1f5f9; font-size:20px; }
+.label { display:block; font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600; }
+input[type="text"], input[type="tel"], input[type="date"] { width:100%; padding:14px; margin-bottom:20px; border-radius:12px; border:2px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6); color:#fff; font-size:15px; transition: all 0.3s; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1); }
+.status-box { padding:16px; border-radius:12px; text-align:center; font-weight:600; margin-bottom:25px; font-size:15px; }
+.status-loading { background: rgba(30, 58, 138, 0.6); color:#93c5fd; border: 1px solid rgba(147, 197, 253, 0.3); }
+.status-ready { background: rgba(6, 78, 59, 0.6); color:#34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.status-error { background: rgba(127, 29, 29, 0.6); color:#f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.status-scanning { background: rgba(254, 243, 199, 0.2); color:#fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+button { width:100%; padding:16px; margin:10px 0; border-radius:12px; border:none; font-weight:700; cursor:pointer; color:#fff; font-size:16px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+.btn-camera { background: linear-gradient(135deg, var(--primary-color), #0891b2 100%); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4); }
+.btn-camera:disabled { background:#475569; opacity:0.5; cursor:not-allowed; box-shadow: none; }
+.btn-camera:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5); }
+.btn-capture { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display:none; font-size:18px; }
+.btn-capture:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+#video { width:100%; border-radius:15px; display:none; margin:20px 0; border: 3px solid var(--primary-color); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+#video.active { border-color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); }
+.footer { text-align:center; font-size:12px; color:#64748b; margin-top:30px; padding:20px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+.loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+@keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-<div class="logo">FACE READER</div>
-</header>
-<div id="statusBox" class="status-box status-loading">
-Loading AI models<span class="loading-dots"></span>
+<div class="logo-container">
+<div class="logo" id="brandLogo">FACE READER</div>
 </div>
+</header>
+<div id="statusBox" class="status-box status-loading">Loading AI models<span class="loading-dots"></span></div>
 <div class="card">
 <h2>Register New Operative</h2>
-<label class="label">Full Name</label>
-<input type="text" id="name" placeholder="" required>
-<label class="label">Company / Employer</label>
-<input type="text" id="company" placeholder="" required>
-<label class="label">Role / Job Title</label>
-<input type="text" id="role" placeholder="">
-<label class="label">Phone Number</label>
-<input type="tel" id="phone" placeholder="">
-<label class="label">Direct Line Manager / Supervisor</label>
-<input type="text" id="supervisor" placeholder="">
-<label class="label">Qualifications</label>
-<input type="text" id="qualifications" placeholder="">
-<label class="label">Qualification Expiry Date</label>
-<input type="date" id="qualExpiry">
-<label class="label">QR Code ID (Optional)</label>
-<input type="text" id="qrCode" placeholder="">
-<button class="btn-camera" id="btnCamera" onclick="startCamera()" disabled>
-Open Camera
-</button>
+<label class="label">Full Name *</label><input type="text" id="name" placeholder="" required>
+<label class="label">Company / Employer *</label><input type="text" id="company" placeholder="" required>
+<label class="label">Role / Job Title</label><input type="text" id="role" placeholder="">
+<label class="label">Phone Number</label><input type="tel" id="phone" placeholder="">
+<label class="label">Direct Line Manager / Supervisor</label><input type="text" id="supervisor" placeholder="">
+<label class="label">Qualifications</label><input type="text" id="qualifications" placeholder="">
+<label class="label">Qualification Expiry Date</label><input type="date" id="qualExpiry">
+<label class="label">QR Code ID (Optional)</label><input type="text" id="qrCode" placeholder="">
+<button class="btn-camera" id="btnCamera" onclick="startCamera()" disabled>Open Camera</button>
 <video id="video" autoplay muted playsinline></video>
-<button class="btn-capture" id="btnCapture" onclick="captureFace()">
-CAPTURE FACE
-</button>
+<button class="btn-capture" id="btnCapture" onclick="captureFace()">CAPTURE FACE</button>
 </div>
-<div class="footer">We Are A Team Together Ltd © 2026</div>
+<div class="footer" id="brandFooterText">We Are A Team Together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
@@ -221,6 +79,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
 const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
+const settingsRef = db.ref('settings/branding');
 let videoStream = null;
 let modelsLoaded = false;
 let isCameraActive = false;
@@ -228,10 +87,7 @@ const statusBox = document.getElementById('statusBox');
 const btnCamera = document.getElementById('btnCamera');
 const btnCapture = document.getElementById('btnCapture');
 const video = document.getElementById('video');
-function setStatus(msg, type) {
-statusBox.textContent = msg;
-statusBox.className = 'status-box status-' + type;
-}
+function setStatus(msg, type) { statusBox.textContent = msg; statusBox.className = 'status-box status-' + type; }
 async function loadModels() {
 try {
 setStatus('Loading AI models...', 'loading');
@@ -242,94 +98,44 @@ await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
 modelsLoaded = true;
 setStatus('Ready! Fill in details and click Open Camera', 'ready');
 btnCamera.disabled = false;
-} catch (err) {
-console.error('Model loading error:', err);
-setStatus('Error loading models: ' + err.message, 'error');
-}
+} catch (err) { console.error('Model loading error:', err); setStatus('Error loading models: ' + err.message, 'error'); }
 }
 async function startCamera() {
 const name = document.getElementById('name').value.trim();
 const company = document.getElementById('company').value.trim();
-if (!name || !company) {
-setStatus('Please enter Name and Company first', 'error');
-document.getElementById('name').focus();
-return;
-}
+if (!name || !company) { setStatus('Please enter Name and Company first', 'error'); document.getElementById('name').focus(); return; }
 try {
 setStatus('Starting camera...', 'scanning');
-videoStream = await navigator.mediaDevices.getUserMedia({
-video: {
-facingMode: 'user',
-width: { ideal: 1280 },
-height: { ideal: 720 }
-}
-});
+videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
 video.srcObject = videoStream;
 video.style.display = 'block';
-await new Promise((resolve) => {
-video.onloadedmetadata = () => {
-video.play();
-resolve();
-};
-});
+await new Promise((resolve) => { video.onloadedmetadata = () => { video.play(); resolve(); }; });
 video.classList.add('active');
 btnCamera.style.display = 'none';
 btnCapture.style.display = 'block';
 isCameraActive = true;
 setStatus('Position your face clearly, then click CAPTURE FACE', 'scanning');
 startFaceDetectionPreview();
-} catch (err) {
-console.error('Camera error:', err);
-setStatus('Camera access denied. Please allow camera permissions.', 'error');
-}
+} catch (err) { console.error('Camera error:', err); setStatus('Camera access denied. Please allow camera permissions.', 'error'); }
 }
 async function startFaceDetectionPreview() {
 if (!isCameraActive) return;
 try {
-const detection = await faceapi.detectSingleFace(
-video,
-new faceapi.TinyFaceDetectorOptions({
-inputSize: 640,
-scoreThreshold: 0.3
-})
-);
-if (detection) {
-setStatus('Face detected! Click CAPTURE FACE to register', 'ready');
-} else {
-setStatus('Position your face in the camera', 'scanning');
-}
-} catch (err) {
-console.log('Detection preview error:', err);
-}
-if (isCameraActive) {
-setTimeout(startFaceDetectionPreview, 1000);
-}
+const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 }));
+if (detection) { setStatus('Face detected! Click CAPTURE FACE to register', 'ready'); }
+else { setStatus('Position your face in the camera', 'scanning'); }
+} catch (err) { console.log('Detection preview error:', err); }
+if (isCameraActive) { setTimeout(startFaceDetectionPreview, 1000); }
 }
 async function captureFace() {
-if (!isCameraActive) {
-setStatus('Camera not active. Please start camera first.', 'error');
-return;
-}
+if (!isCameraActive) { setStatus('Camera not active. Please start camera first.', 'error'); return; }
 setStatus('Capturing face...', 'scanning');
 btnCapture.disabled = true;
 try {
-if (video.paused || video.ended) {
-await video.play();
-}
+if (video.paused || video.ended) { await video.play(); }
 await new Promise(resolve => setTimeout(resolve, 500));
-const detection = await faceapi.detectSingleFace(
-video,
-new faceapi.TinyFaceDetectorOptions({
-inputSize: 640,
-scoreThreshold: 0.3
-})
-).withFaceLandmarks()
-.withFaceDescriptor();
-if (!detection) {
-setStatus('No face detected! Try better lighting and position.', 'error');
-btnCapture.disabled = false;
-return;
-}
+const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+if (!detection) { setStatus('No face detected! Try better lighting and position.', 'error'); btnCapture.disabled = false; return; }
 const faceDescriptor = Array.from(detection.descriptor);
 const name = document.getElementById('name').value.trim();
 const company = document.getElementById('company').value.trim();
@@ -342,23 +148,9 @@ const qrCode = document.getElementById('qrCode').value.trim();
 setStatus('Saving to database...', 'scanning');
 const newRef = operativesRef.push();
 const id = newRef.key;
-const operativeData = {
-name,
-company,
-role,
-phone,
-supervisor,
-qualifications,
-qualExpiry,
-qrCode,
-createdAt: firebase.database.ServerValue.TIMESTAMP
-};
+const operativeData = { name, company, role, phone, supervisor, qualifications, qualExpiry, qrCode, createdAt: firebase.database.ServerValue.TIMESTAMP };
 await newRef.set(operativeData);
-await faceDescriptorsRef.child(id).set({
-descriptor: faceDescriptor,
-name,
-company
-});
+await faceDescriptorsRef.child(id).set({ descriptor: faceDescriptor, name, company });
 setStatus('Successfully registered: ' + name, 'ready');
 stopCamera();
 document.getElementById('name').value = '';
@@ -372,24 +164,31 @@ document.getElementById('qrCode').value = '';
 btnCamera.style.display = 'block';
 btnCapture.style.display = 'none';
 btnCapture.disabled = false;
-setTimeout(() => {
-setStatus('Ready! Fill in details and click Open Camera', 'ready');
-}, 3000);
-} catch (err) {
-console.error('Capture error:', err);
-setStatus('Error: ' + err.message, 'error');
-btnCapture.disabled = false;
-}
+setTimeout(() => { setStatus('Ready! Fill in details and click Open Camera', 'ready'); }, 3000);
+} catch (err) { console.error('Capture error:', err); setStatus('Error: ' + err.message, 'error'); btnCapture.disabled = false; }
 }
 function stopCamera() {
-if (videoStream) {
-videoStream.getTracks().forEach(track => track.stop());
-videoStream = null;
-}
+if (videoStream) { videoStream.getTracks().forEach(track => track.stop()); videoStream = null; }
 video.style.display = 'none';
 video.classList.remove('active');
 isCameraActive = false;
 }
+
+// BRANDING LISTENER
+function applyBranding(data) {
+if (!data) return;
+document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
+document.documentElement.style.setProperty('--secondary-color', data.color2 || '#f97316');
+const logoEl = document.getElementById('brandLogo');
+if (logoEl) {
+if (data.logoUrl) { logoEl.innerHTML = '<img src="' + data.logoUrl + '" alt="Logo">'; }
+else { logoEl.textContent = data.name || 'FACE READER'; }
+}
+const footerEl = document.getElementById('brandFooterText');
+if (footerEl) footerEl.textContent = data.footer || 'We Are A Team Together Ltd © 2026';
+}
+settingsRef.on('value', function(snap) { applyBranding(snap.val()); });
+
 loadModels();
 </script>
 </body>
