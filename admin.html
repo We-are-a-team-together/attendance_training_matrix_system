@@ -56,15 +56,42 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <h2 id="formTitle">➕ Add / Edit Operative</h2>
 <form id="operativeForm">
 <input type="hidden" id="operativeId">
-<div class="input-group"><label>Full Name *</label><input type="text" id="name" placeholder="" required></div>
-<div class="input-group"><label>Company / Employer *</label><input type="text" id="company" placeholder="" required></div>
-<div class="input-group"><label>Assigned Location *</label><input type="text" id="assignedLocation" placeholder="" required></div>
-<div class="input-group"><label>Role / Job Title</label><input type="text" id="role" placeholder=""></div>
-<div class="input-group"><label>Phone Number</label><input type="tel" id="phone" placeholder=""></div>
-<div class="input-group"><label>Direct Line Manager / Supervisor</label><input type="text" id="supervisor" placeholder=""></div>
-<div class="input-group"><label>Qualifications</label><input type="text" id="qualifications" placeholder=""></div>
-<div class="input-group"><label>Qualification Expiry Date</label><input type="date" id="qualExpiry"></div>
-<div class="input-group"><label>QR Code ID (Optional)</label><input type="text" id="qrCode" placeholder=""></div>
+<div class="input-group">
+<label>Full Name *</label>
+<input type="text" id="name" placeholder="" required>
+</div>
+<div class="input-group">
+<label>Company / Employer *</label>
+<input type="text" id="company" placeholder="" required>
+</div>
+<div class="input-group">
+<label>Assigned Location *</label>
+<input type="text" id="assignedLocation" placeholder="" required>
+</div>
+<div class="input-group">
+<label>Role / Job Title</label>
+<input type="text" id="role" placeholder="">
+</div>
+<div class="input-group">
+<label>Phone Number</label>
+<input type="tel" id="phone" placeholder="">
+</div>
+<div class="input-group">
+<label>Direct Line Manager / Supervisor</label>
+<input type="text" id="supervisor" placeholder="">
+</div>
+<div class="input-group">
+<label>Qualifications</label>
+<input type="text" id="qualifications" placeholder="">
+</div>
+<div class="input-group">
+<label>Qualification Expiry Date</label>
+<input type="date" id="qualExpiry">
+</div>
+<div class="input-group">
+<label>QR Code ID (Optional)</label>
+<input type="text" id="qrCode" placeholder="">
+</div>
 <div class="btn-group">
 <button type="submit" class="btn-save">💾 Save Details</button>
 <button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
@@ -73,13 +100,23 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 </div>
 <div class="card">
 <h2>👥 Registered Operatives (<span id="count">0</span>)</h2>
-<div id="operativeList"><div class="empty">Loading operatives...</div></div>
+<div id="operativeList">
+<div class="empty">Loading operatives...</div>
+</div>
 </div>
 <div class="footer">We Are A Team Together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
-const firebaseConfig = { apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw", authDomain: "signin-facereader.firebaseapp.com", databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app", projectId: "signin-facereader", storageBucket: "signin-facereader.firebasestorage.app", messagingSenderId: "815339415778", appId: "1:815339415778:web:d4b131f38c8d6a42f716bb" };
+const firebaseConfig = {
+apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
+authDomain: "signin-facereader.firebaseapp.com",
+databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "signin-facereader",
+storageBucket: "signin-facereader.firebasestorage.app",
+messagingSenderId: "815339415778",
+appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
+};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
@@ -93,8 +130,23 @@ function resetForm() { form.reset(); document.getElementById('operativeId').valu
 form.addEventListener('submit', async (e) => {
 e.preventDefault();
 const id = document.getElementById('operativeId').value;
-const data = { name: document.getElementById('name').value.trim(), company: document.getElementById('company').value.trim(), assignedLocation: document.getElementById('assignedLocation').value.trim(), role: document.getElementById('role').value.trim(), phone: document.getElementById('phone').value.trim(), supervisor: document.getElementById('supervisor').value.trim(), qualifications: document.getElementById('qualifications').value.trim(), qualExpiry: document.getElementById('qualExpiry').value.trim(), qrCode: document.getElementById('qrCode').value.trim(), updatedAt: firebase.database.ServerValue.TIMESTAMP };
-try { if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); } else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); } resetForm(); } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+const data = {
+name: document.getElementById('name').value.trim(),
+company: document.getElementById('company').value.trim(),
+assignedLocation: document.getElementById('assignedLocation').value.trim(),
+role: document.getElementById('role').value.trim(),
+phone: document.getElementById('phone').value.trim(),
+supervisor: document.getElementById('supervisor').value.trim(),
+qualifications: document.getElementById('qualifications').value.trim(),
+qualExpiry: document.getElementById('qualExpiry').value.trim(),
+qrCode: document.getElementById('qrCode').value.trim(),
+updatedAt: firebase.database.ServerValue.TIMESTAMP
+};
+try {
+if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); }
+else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); }
+resetForm();
+} catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
 });
 function editOperative(id) {
 const o = operatives[id];
@@ -109,7 +161,7 @@ const list = Object.entries(operatives).map(([id, o]) => ({ id, ...o }));
 document.getElementById('count').textContent = list.length;
 if (list.length === 0) { listEl.innerHTML = '<div class="empty">No operatives registered yet</div>'; return; }
 list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-listEl.innerHTML = list.map(o => `<div class="operative-item"><div style="flex:1;"><div class="name">${o.name || 'Unnamed'}</div><div class="details"><span class="company">${o.company || 'No Company'}</span> • <span class="location">📍 ${o.assignedLocation || 'Unassigned'}</span><br>${o.role || 'No role'}${o.phone ? '<br>📞 ' + o.phone : ''}${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}${o.qualifications ? '<br>🎓 Quals: ' + o.qualifications : ''}${o.qualExpiry ? '<br> Expires: ' + o.qualExpiry : ''}${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}</div></div><div class="actions"><button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button><button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑 Delete</button></div></div>`).join('');
+listEl.innerHTML = list.map(o => `<div class="operative-item"><div style="flex:1;"><div class="name">${o.name || 'Unnamed'}</div><div class="details"><span class="company">${o.company || 'No Company'}</span> • <span class="location"> ${o.assignedLocation || 'Unassigned'}</span><br>${o.role || 'No role'}${o.phone ? '<br>📞 ' + o.phone : ''}${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}${o.qualifications ? '<br>🎓 Quals: ' + o.qualifications : ''}${o.qualExpiry ? '<br> Expires: ' + o.qualExpiry : ''}${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}</div></div><div class="actions"><button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button><button class="btn-delete" onclick="deleteOperative('${o.id}')"> Delete</button></div></div>`).join('');
 }
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); render(); });
 </script>
