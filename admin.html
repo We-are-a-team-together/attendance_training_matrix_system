@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader Premium - Admin Panel</title>
+<title>Face Reader - Admin Panel</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
@@ -47,7 +47,7 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <body>
 <div class="container">
 <header>
-<div class="logo">FACE READER PREMIUM</div>
+<div class="logo">FACE READER</div>
 <div class="badge">Admin Panel</div>
 </header>
 <a href="index.html" class="btn-register"> Go to Face Registration Page</a>
@@ -72,22 +72,14 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 </form>
 </div>
 <div class="card">
-<h2> Registered Operatives (<span id="count">0</span>)</h2>
+<h2>👥 Registered Operatives (<span id="count">0</span>)</h2>
 <div id="operativeList"><div class="empty">Loading operatives...</div></div>
 </div>
-<div class="footer">We are a team together Ltd © 2026</div>
+<div class="footer">We Are A Team Together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
-const firebaseConfig = {
-apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
-authDomain: "signin-facereader.firebaseapp.com",
-databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
-projectId: "signin-facereader",
-storageBucket: "signin-facereader.firebasestorage.app",
-messagingSenderId: "815339415778",
-appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
-};
+const firebaseConfig = { apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw", authDomain: "signin-facereader.firebaseapp.com", databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app", projectId: "signin-facereader", storageBucket: "signin-facereader.firebasestorage.app", messagingSenderId: "815339415778", appId: "1:815339415778:web:d4b131f38c8d6a42f716bb" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
@@ -102,58 +94,22 @@ form.addEventListener('submit', async (e) => {
 e.preventDefault();
 const id = document.getElementById('operativeId').value;
 const data = { name: document.getElementById('name').value.trim(), company: document.getElementById('company').value.trim(), assignedLocation: document.getElementById('assignedLocation').value.trim(), role: document.getElementById('role').value.trim(), phone: document.getElementById('phone').value.trim(), supervisor: document.getElementById('supervisor').value.trim(), qualifications: document.getElementById('qualifications').value.trim(), qualExpiry: document.getElementById('qualExpiry').value.trim(), qrCode: document.getElementById('qrCode').value.trim(), updatedAt: firebase.database.ServerValue.TIMESTAMP };
-try {
-if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); }
-else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); }
-resetForm();
-} catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+try { if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); } else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); } resetForm(); } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
 });
 function editOperative(id) {
 const o = operatives[id];
 document.getElementById('operativeId').value = id;
-document.getElementById('name').value = o.name || '';
-document.getElementById('company').value = o.company || '';
-document.getElementById('assignedLocation').value = o.assignedLocation || '';
-document.getElementById('role').value = o.role || '';
-document.getElementById('phone').value = o.phone || '';
-document.getElementById('supervisor').value = o.supervisor || '';
-document.getElementById('qualifications').value = o.qualifications || '';
-document.getElementById('qualExpiry').value = o.qualExpiry || '';
-document.getElementById('qrCode').value = o.qrCode || '';
+document.getElementById('name').value = o.name || ''; document.getElementById('company').value = o.company || ''; document.getElementById('assignedLocation').value = o.assignedLocation || ''; document.getElementById('role').value = o.role || ''; document.getElementById('phone').value = o.phone || ''; document.getElementById('supervisor').value = o.supervisor || ''; document.getElementById('qualifications').value = o.qualifications || ''; document.getElementById('qualExpiry').value = o.qualExpiry || ''; document.getElementById('qrCode').value = o.qrCode || '';
 document.getElementById('formTitle').textContent = '✏️ Edit: ' + (o.name || 'Unnamed');
 window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-async function deleteOperative(id) {
-if (!confirm('⚠️ Delete this operative and their face data? This cannot be undone.')) return;
-try { await operativesRef.child(id).remove(); await faceDescriptorsRef.child(id).remove(); showStatus('✅ Deleted successfully', 'success'); }
-catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
-}
+async function deleteOperative(id) { if (!confirm('⚠️ Delete this operative and their face data?')) return; try { await operativesRef.child(id).remove(); await faceDescriptorsRef.child(id).remove(); showStatus('✅ Deleted successfully', 'success'); } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); } }
 function render() {
 const list = Object.entries(operatives).map(([id, o]) => ({ id, ...o }));
 document.getElementById('count').textContent = list.length;
 if (list.length === 0) { listEl.innerHTML = '<div class="empty">No operatives registered yet</div>'; return; }
 list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-listEl.innerHTML = list.map(o => `
-<div class="operative-item">
-<div style="flex:1;">
-<div class="name">${o.name || 'Unnamed'}</div>
-<div class="details">
-<span class="company">${o.company || 'No Company'}</span> • 
-<span class="location">📍 ${o.assignedLocation || 'Unassigned'}</span><br>
-${o.role || 'No role'}
-${o.phone ? '<br>📞 ' + o.phone : ''}
-${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
-${o.qualifications ? '<br>🎓 Quals: ' + o.qualifications : ''}
-${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
-${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
-</div>
-</div>
-<div class="actions">
-<button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
-<button class="btn-delete" onclick="deleteOperative('${o.id}')"> Delete</button>
-</div>
-</div>
-`).join('');
+listEl.innerHTML = list.map(o => `<div class="operative-item"><div style="flex:1;"><div class="name">${o.name || 'Unnamed'}</div><div class="details"><span class="company">${o.company || 'No Company'}</span> • <span class="location">📍 ${o.assignedLocation || 'Unassigned'}</span><br>${o.role || 'No role'}${o.phone ? '<br>📞 ' + o.phone : ''}${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}${o.qualifications ? '<br>🎓 Quals: ' + o.qualifications : ''}${o.qualExpiry ? '<br> Expires: ' + o.qualExpiry : ''}${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}</div></div><div class="actions"><button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button><button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑 Delete</button></div></div>`).join('');
 }
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); render(); });
 </script>
