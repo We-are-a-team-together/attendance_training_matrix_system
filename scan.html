@@ -3,191 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Face Reader - Terminal</title>
+<title>Face Reader - Site Terminal</title>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
+:root { --primary-color: #06b6d4; --secondary-color: #f97316; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-color:#fff;
-font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-min-height:100vh;
-position: relative;
-overflow-x: hidden;
-}
-body::before {
-content: '';
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background:
-radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.1) 0%, transparent 50%);
-pointer-events: none;
-z-index: 0;
-}
+body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; position: relative; overflow-x: hidden; }
+body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.1) 0%, transparent 50%); pointer-events: none; z-index: 0; }
 .container { max-width:600px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
 header { text-align:center; padding:30px 0; margin-bottom:20px; }
-.logo {
-font-size:36px;
-font-weight:900;
-background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
-letter-spacing: 2px;
-}
+.logo-container { display: flex; justify-content: center; align-items: center; }
+.logo { font-size:36px; font-weight:900; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; display: flex; align-items: center; }
+.logo img { max-height: 60px; width: auto; -webkit-text-fill-color: initial; }
 .tagline { color:#94a3b8; font-size:13px; margin-top:8px; letter-spacing: 3px; text-transform: uppercase; }
-.card {
-background: rgba(30, 41, 59, 0.8);
-backdrop-filter: blur(10px);
-padding:25px;
-border-radius:20px;
-margin-bottom:20px;
-border: 1px solid rgba(255,255,255,0.1);
-box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-h2 {
-margin:0 0 20px;
-font-size:13px;
-color:#94a3b8;
-text-transform:uppercase;
-letter-spacing:2px;
-font-weight:700;
-}
-button {
-width:100%;
-padding:18px;
-margin:10px 0;
-border-radius:12px;
-border:none;
-font-weight:700;
-cursor:pointer;
-color:#fff;
-font-size:16px;
-transition: all 0.3s ease;
-text-transform: uppercase;
-letter-spacing: 1px;
-}
-.btn-face {
-background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
-}
+.card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding:25px; border-radius:20px; margin-bottom:20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+h2 { margin:0 0 20px; font-size:13px; color:#94a3b8; text-transform:uppercase; letter-spacing:2px; font-weight:700; }
+button { width:100%; padding:18px; margin:10px 0; border-radius:12px; border:none; font-weight:700; cursor:pointer; color:#fff; font-size:16px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+.btn-face { background: linear-gradient(135deg, var(--primary-color), #0891b2 100%); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4); }
 .btn-face:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5); }
-.btn-capture {
-background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-display:none;
-}
+.btn-capture { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display:none; }
 .btn-capture:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
-.btn-qr {
-background: linear-gradient(135deg, #059669 0%, #047857 100%);
-box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-}
+.btn-qr { background: linear-gradient(135deg, #059669 0%, #047857 100%); box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4); }
 .btn-qr:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5); }
-.btn-qr.scanning {
-background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-0%, 100% { opacity: 1; }
-50% { opacity: 0.7; }
-}
-#video {
-width:100%;
-border-radius:15px;
-display:none;
-margin-bottom:15px;
-border: 3px solid rgba(6, 182, 212, 0.5);
-box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
+.btn-qr.scanning { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+#video { width:100%; border-radius:15px; display:none; margin-bottom:15px; border: 3px solid var(--primary-color); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 #qr-reader { display:none; border-radius:15px; overflow:hidden; }
-.status-box {
-padding:24px 20px;
-border-radius:15px;
-text-align:center;
-font-weight:600;
-font-size:16px;
-margin-bottom:25px;
-animation: slideIn 0.3s ease;
-border: 2px solid transparent;
-min-height: 80px;
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-}
-@keyframes slideIn {
-from { opacity: 0; transform: translateY(-10px); }
-to { opacity: 1; transform: translateY(0); }
-}
-.status-idle {
-background: rgba(30, 41, 59, 0.6);
-color:#94a3b8;
-border-color: rgba(255,255,255,0.1);
-}
-.status-scanning {
-background: rgba(254, 243, 199, 0.2);
-color:#fbbf24;
-border-color: rgba(251, 191, 36, 0.3);
-}
-.status-success {
-background: rgba(6, 78, 59, 0.6);
-color:#34d399;
-border-color: rgba(52, 211, 153, 0.3);
-}
-.status-error {
-background: rgba(127, 29, 29, 0.6);
-color:#f87171;
-border-color: rgba(248, 113, 113, 0.3);
-}
-.status-info {
-background: rgba(30, 58, 138, 0.6);
-color:#93c5fd;
-border-color: rgba(147, 197, 253, 0.3);
-}
-.location-info {
-background: rgba(99, 102, 241, 0.2);
-color:#a5b4fc;
-padding:12px;
-border-radius:10px;
-margin-top:15px;
-font-size:13px;
-display:none;
-border: 1px solid rgba(99, 102, 241, 0.3);
-}
+.status-box { padding:24px 20px; border-radius:15px; text-align:center; font-weight:600; font-size:16px; margin-bottom:25px; animation: slideIn 0.3s ease; border: 2px solid transparent; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.status-idle { background: rgba(30, 41, 59, 0.6); color:#94a3b8; border-color: rgba(255,255,255,0.1); }
+.status-scanning { background: rgba(254, 243, 199, 0.2); color:#fbbf24; border-color: rgba(251, 191, 36, 0.3); }
+.status-success { background: rgba(6, 78, 59, 0.6); color:#34d399; border-color: rgba(52, 211, 153, 0.3); }
+.status-error { background: rgba(127, 29, 29, 0.6); color:#f87171; border-color: rgba(248, 113, 113, 0.3); }
+.status-info { background: rgba(30, 58, 138, 0.6); color:#93c5fd; border-color: rgba(147, 197, 253, 0.3); }
+.location-info { background: rgba(99, 102, 241, 0.2); color:#a5b4fc; padding:12px; border-radius:10px; margin-top:15px; font-size:13px; display:none; border: 1px solid rgba(99, 102, 241, 0.3); }
 .location-icon { display:inline-block; margin-right:6px; }
-.footer {
-text-align:center;
-font-size:12px;
-color:#64748b;
-margin-top:30px;
-padding:20px 0;
-border-top: 1px solid rgba(255,255,255,0.1);
-}
-.privacy-notice {
-background: rgba(249, 115, 22, 0.1);
-border: 1px solid rgba(249, 115, 22, 0.3);
-padding:15px;
-border-radius:10px;
-margin-bottom:20px;
-font-size:12px;
-color:#fbbf24;
-text-align:center;
-}
+.footer { text-align:center; font-size:12px; color:#64748b; margin-top:30px; padding:20px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+.privacy-notice { background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); padding:15px; border-radius:10px; margin-bottom:20px; font-size:12px; color:#fbbf24; text-align:center; }
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-<div class="logo">FACE READER</div>
+<div class="logo-container">
+<div class="logo" id="brandLogo">FACE READER</div>
+</div>
+<div class="tagline">Site Terminal</div>
 </header>
-<div class="privacy-notice">Location tracking enabled for attendance verification</div>
+<div class="privacy-notice">🔒 Location tracking enabled for attendance verification</div>
 <div id="statusBox" class="status-box status-idle">Ready to sign in</div>
 <div class="card">
-<h2>Face Recognition</h2>
+<h2>🎥 Face Recognition</h2>
 <button type="button" class="btn-face" id="btnFace" onclick="startFaceScan()">Start Face Scan</button>
 <button type="button" class="btn-capture" id="btnCapture" onclick="captureFace()">Capture & Sign In</button>
 <video id="video" autoplay muted playsinline></video>
@@ -197,11 +66,11 @@ text-align:center;
 </div>
 </div>
 <div class="card">
-<h2>QR Code</h2>
+<h2>📷 QR Code</h2>
 <div id="qr-reader"></div>
 <button type="button" class="btn-qr" id="btnQr" onclick="toggleQrScan()">Open Camera for QR</button>
 </div>
-<div class="footer">We Are A Team Together Ltd © 2026</div>
+<div class="footer" id="brandFooterText">We Are A Team Together Ltd © 2026</div>
 </div>
 <script>
 const SITE_ID = "I";
@@ -220,113 +89,60 @@ const signinsRef = db.ref('sites/' + SITE_ID + '/signins');
 const statusRef = db.ref('sites/' + SITE_ID + '/status');
 const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
+const settingsRef = db.ref('settings/branding');
 let isFaceScanning = false, isQrScanning = false, videoStream = null, qrScanner = null;
 let faceDescriptors = {}, operatives = {}, modelsLoaded = false;
 let currentLocation = null;
 async function loadModels() {
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
-await Promise.all([
-faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-]);
+await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)]);
 modelsLoaded = true;
 }
 faceDescriptorsRef.on('value', snap => { faceDescriptors = {}; snap.forEach(child => { faceDescriptors[child.key] = child.val(); }); });
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); });
 function showStatus(msg, type, isHtml = false) {
 const box = document.getElementById('statusBox');
-if (isHtml) {
-box.innerHTML = msg;
-} else {
-box.textContent = msg;
-}
+if (isHtml) { box.innerHTML = msg; } else { box.textContent = msg; }
 box.className = 'status-box status-' + type;
 }
-function showLocationInfo(text) {
-const locDiv = document.getElementById('locationInfo');
-const locText = document.getElementById('locationText');
-locText.textContent = text;
-locDiv.style.display = 'block';
-}
-function hideLocationInfo() {
-document.getElementById('locationInfo').style.display = 'none';
-}
+function showLocationInfo(text) { document.getElementById('locationText').textContent = text; document.getElementById('locationInfo').style.display = 'block'; }
+function hideLocationInfo() { document.getElementById('locationInfo').style.display = 'none'; }
 function getLocation() {
 return new Promise((resolve, reject) => {
-if (!navigator.geolocation) {
-reject(new Error('Geolocation not supported'));
-return;
-}
-showLocationInfo('Acquiring location...');
-navigator.geolocation.getCurrentPosition(
-async (position) => {
-const lat = position.coords.latitude;
-const lng = position.coords.longitude;
-const accuracy = position.coords.accuracy;
-showLocationInfo(`Location acquired (${accuracy.toFixed(0)}m accuracy)`);
-try {
-const address = await reverseGeocode(lat, lng);
-resolve({ lat, lng, accuracy, address });
-} catch (err) {
-resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` });
-},
-(error) => {
-hideLocationInfo();
-reject(error);
-},
-{ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-);
+if (!navigator.geolocation) { reject(new Error('Geolocation not supported')); return; }
+showLocationInfo(' Acquiring location...');
+navigator.geolocation.getCurrentPosition(async (position) => {
+const lat = position.coords.latitude; const lng = position.coords.longitude; const accuracy = position.coords.accuracy;
+showLocationInfo(`📍 Location acquired (${accuracy.toFixed(0)}m accuracy)`);
+try { const address = await reverseGeocode(lat, lng); resolve({ lat, lng, accuracy, address }); }
+catch (err) { resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }); }
+}, (error) => { hideLocationInfo(); resolve(null); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 });
 }
 async function reverseGeocode(lat, lng) {
 try {
-const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-headers: { 'User-Agent': 'FaceReader Attendance System' }
-});
+const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'FaceReader Attendance System' } });
 const data = await response.json();
-if (data.display_name) {
-const addr = data.address;
-const parts = [];
-if (addr.road) parts.push(addr.road);
-if (addr.suburb) parts.push(addr.suburb);
-if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
-if (addr.postcode) parts.push(addr.postcode);
-return parts.join(', ') || data.display_name;
-}
+if (data.display_name) { const addr = data.address; const parts = []; if (addr.road) parts.push(addr.road); if (addr.suburb) parts.push(addr.suburb); if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village); if (addr.postcode) parts.push(addr.postcode); return parts.join(', ') || data.display_name; }
 return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-} catch (err) {
-console.error('Geocoding error:', err);
-return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-}
+} catch (err) { return `${lat.toFixed(4)}, ${lng.toFixed(4)}`; }
 }
 async function startFaceScan() {
 if (!modelsLoaded) await loadModels();
 if (isQrScanning) stopQrScan();
-try {
-currentLocation = await getLocation();
-} catch (err) {
-console.error('Location error:', err);
-showStatus('Location access denied. Please enable location services.', 'error');
-setTimeout(() => { showStatus('Ready to sign in', 'idle'); }, 3000);
-return;
-}
 isFaceScanning = true;
 document.getElementById('btnFace').style.display = 'none';
 document.getElementById('btnCapture').style.display = 'block';
-showStatus('Position your face in the camera', 'scanning');
+showStatus('👤 Position your face in the camera', 'scanning');
 try {
 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
 const video = document.getElementById('video');
 video.srcObject = videoStream;
 video.style.display = 'block';
 await new Promise(r => { video.onloadedmetadata = () => { video.play(); r(); }; });
+currentLocation = await getLocation();
 detectFaceLoop();
-} catch (err) {
-hideLocationInfo();
-showStatus('Camera error', 'error');
-stopFaceScan();
-}
+} catch (err) { hideLocationInfo(); showStatus('❌ Camera error. Check permissions.', 'error'); stopFaceScan(); }
 }
 function stopFaceScan() {
 isFaceScanning = false;
@@ -346,50 +162,29 @@ if (!video || video.readyState !== 4) { setTimeout(detectFaceLoop, 500); return;
 const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
 if (detection) {
 const result = findBestMatch(detection.descriptor);
-if (result.match) {
-await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE');
-stopFaceScan();
-} else {
-hideLocationInfo();
-showStatus('Face not recognized - try QR code', 'error');
-setTimeout(() => { if (isFaceScanning) showStatus('Position your face in the camera', 'scanning'); }, 3000);
-}
+if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE'); stopFaceScan(); }
+else { hideLocationInfo(); showStatus('Face not recognized - try QR code', 'error'); setTimeout(() => { if (isFaceScanning) showStatus('Position your face in the camera', 'scanning'); }, 3000); }
 }
 } catch (err) { console.error(err); }
 if (isFaceScanning) setTimeout(detectFaceLoop, 500);
 }
 async function captureFace() {
-showStatus('Capturing...', 'info');
+showStatus('⏳ Capturing...', 'info');
 try {
 const video = document.getElementById('video');
 const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-if (!detection) {
-hideLocationInfo();
-showStatus('No face detected', 'error');
-return;
-}
+if (!detection) { hideLocationInfo(); showStatus('⚠️ No face detected', 'error'); return; }
 const result = findBestMatch(detection.descriptor);
-if (result.match) {
-await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE');
-stopFaceScan();
-} else {
-hideLocationInfo();
-showStatus('Face not recognized - try QR', 'error');
-}
-} catch (err) {
-hideLocationInfo();
-showStatus('Error', 'error');
-}
+if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE'); stopFaceScan(); }
+else { hideLocationInfo(); showStatus('Face not recognized - try QR', 'error'); }
+} catch (err) { hideLocationInfo(); showStatus('❌ Error', 'error'); }
 }
 function findBestMatch(inputDescriptor) {
 const THRESHOLD = 0.75;
 for (const [id, data] of Object.entries(faceDescriptors)) {
 const storedDescriptor = new Float32Array(data.descriptor);
 const distance = faceapi.euclideanDistance(inputDescriptor, storedDescriptor);
-if (distance < THRESHOLD) {
-const operative = operatives[id];
-if (operative) return { match: { id, name: operative.name, company: operative.company } };
-}
+if (distance < THRESHOLD) { const operative = operatives[id]; if (operative) return { match: { id, name: operative.name, company: operative.company } }; }
 }
 return { match: null };
 }
@@ -399,73 +194,31 @@ const statusSnap = await statusRef.child(operativeId).once('value');
 const currentStatus = statusSnap.val();
 const isOnSite = currentStatus && currentStatus.onSite;
 const action = isOnSite ? 'OUT' : 'IN';
-const signinData = {
-operativeId,
-operativeName: name,
-operativeCompany: company,
-action,
-method,
-timestamp: firebase.database.ServerValue.TIMESTAMP,
-date: new Date().toISOString().slice(0,10)
-};
-if (currentLocation) {
-signinData.location = {
-lat: currentLocation.lat,
-lng: currentLocation.lng,
-accuracy: currentLocation.accuracy,
-address: currentLocation.address,
-timestamp: Date.now()
-};
-}
+const signinData = { operativeId, operativeName: name, operativeCompany: company, action, method, timestamp: firebase.database.ServerValue.TIMESTAMP, date: new Date().toISOString().slice(0,10) };
+if (currentLocation) { signinData.location = { lat: currentLocation.lat, lng: currentLocation.lng, accuracy: currentLocation.accuracy, address: currentLocation.address, timestamp: Date.now() }; }
 await signinsRef.push(signinData);
-await statusRef.child(operativeId).set({
-onSite: action === 'IN',
-lastAction: action,
-lastTimestamp: firebase.database.ServerValue.TIMESTAMP,
-company: company
-});
+await statusRef.child(operativeId).set({ onSite: action === 'IN', lastAction: action, lastTimestamp: firebase.database.ServerValue.TIMESTAMP, company: company });
 const actionText = action === 'IN' ? 'SUCCESSFULLY SIGNED IN' : 'SUCCESSFULLY SIGNED OUT';
 const icon = action === 'IN' ? '✅' : '👋';
 const accentColor = action === 'IN' ? '#34d399' : '#fbbf24';
-const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;">${currentLocation.address}</div>` : '';
-const msg = `
-<div style="font-size: 22px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px; letter-spacing: 1px;">
-${icon} ${actionText}
-</div>
-<div style="font-size: 18px; font-weight: 600; color: #fff;">${name}</div>
-<div style="font-size: 14px; color: #94a3b8;">${company}</div>
-${locText}
-`;
+const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;">📍 ${currentLocation.address}</div>` : '';
+const msg = `<div style="font-size: 22px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px; letter-spacing: 1px;">${icon} ${actionText}</div><div style="font-size: 18px; font-weight: 600; color: #fff;">${name}</div><div style="font-size: 14px; color: #94a3b8;">${company}</div>${locText}`;
 showStatus(msg, 'success', true);
 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 setTimeout(() => { if (!isFaceScanning && !isQrScanning) showStatus('Ready to sign in', 'idle'); }, 6000);
-} catch (err) {
-hideLocationInfo();
-showStatus('Error saving: ' + err.message, 'error');
-}
+} catch (err) { hideLocationInfo(); showStatus('❌ Error saving: ' + err.message, 'error'); }
 }
 function toggleQrScan() { if (isQrScanning) stopQrScan(); else startQrScan(); }
 async function startQrScan() {
 if (isFaceScanning) stopFaceScan();
-try {
-currentLocation = await getLocation();
-} catch (err) {
-console.error('Location error:', err);
-}
 isQrScanning = true;
 document.getElementById('btnQr').classList.add('scanning');
 document.getElementById('btnQr').textContent = 'Stop QR Scan';
-showStatus('Point camera at QR code', 'scanning');
+showStatus('📷 Point camera at QR code', 'scanning');
 document.getElementById('qr-reader').style.display = 'block';
+currentLocation = await getLocation();
 qrScanner = new Html5Qrcode("qr-reader");
-qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 } },
-(decodedText) => { handleQrCode(decodedText); stopQrScan(); },
-() => {}
-).catch(err => {
-hideLocationInfo();
-showStatus('QR error', 'error');
-stopQrScan();
-});
+qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 } }, (decodedText) => { handleQrCode(decodedText); stopQrScan(); }, () => {}).catch(err => { hideLocationInfo(); showStatus('QR error', 'error'); stopQrScan(); });
 }
 function stopQrScan() {
 isQrScanning = false;
@@ -479,14 +232,27 @@ showStatus('Ready to sign in', 'idle');
 }
 async function handleQrCode(qrData) {
 for (const [id, data] of Object.entries(operatives)) {
-if (data.qrCode === qrData || id === qrData) {
-await recordSignin(id, data.name, data.company, 'QR');
-return;
-}
+if (data.qrCode === qrData || id === qrData) { await recordSignin(id, data.name, data.company, 'QR'); return; }
 }
 hideLocationInfo();
-showStatus('Unknown QR code', 'error');
+showStatus('❌ Unknown QR code', 'error');
 }
+
+// BRANDING LISTENER
+function applyBranding(data) {
+if (!data) return;
+document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
+document.documentElement.style.setProperty('--secondary-color', data.color2 || '#f97316');
+const logoEl = document.getElementById('brandLogo');
+if (logoEl) {
+if (data.logoUrl) { logoEl.innerHTML = '<img src="' + data.logoUrl + '" alt="Logo">'; }
+else { logoEl.textContent = data.name || 'FACE READER'; }
+}
+const footerEl = document.getElementById('brandFooterText');
+if (footerEl) footerEl.textContent = data.footer || 'We Are A Team Together Ltd © 2026';
+}
+settingsRef.on('value', function(snap) { applyBranding(snap.val()); });
+
 loadModels();
 </script>
 </body>
