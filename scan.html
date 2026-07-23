@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Face Reader - Site Terminal</title>
+<title>Face Reader - Terminal</title>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-:root { --primary-color: #06b6d4; --secondary-color: #f97316; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
 background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -30,18 +29,16 @@ pointer-events: none;
 z-index: 0;
 }
 .container { max-width:600px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
-header { text-align:center; padding:30px 0; margin-bottom:20px; display: flex; flex-direction: column; align-items: center; }
-.logo-container { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+header { text-align:center; padding:30px 0; margin-bottom:20px; }
 .logo {
-font-size:24px;
+font-size:36px;
 font-weight:900;
-color: var(--primary-color);
+background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
 letter-spacing: 2px;
-display: flex;
-align-items: center;
 }
-.logo img { max-height: 50px; width: auto; }
-.system-name { font-size: 20px; font-weight: 700; color: #fff; }
 .tagline { color:#94a3b8; font-size:13px; margin-top:8px; letter-spacing: 3px; text-transform: uppercase; }
 .card {
 background: rgba(30, 41, 59, 0.8);
@@ -75,7 +72,7 @@ text-transform: uppercase;
 letter-spacing: 1px;
 }
 .btn-face {
-background: linear-gradient(135deg, var(--primary-color), #0891b2 100%);
+background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
 box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
 }
 .btn-face:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5); }
@@ -103,7 +100,7 @@ width:100%;
 border-radius:15px;
 display:none;
 margin-bottom:15px;
-border: 3px solid var(--primary-color);
+border: 3px solid rgba(6, 182, 212, 0.5);
 box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 #qr-reader { display:none; border-radius:15px; overflow:hidden; }
@@ -185,19 +182,12 @@ text-align:center;
 <body>
 <div class="container">
 <header>
-  <div class="logo-container">
-    <div class="logo" id="brandLogo"></div>
-    <div class="system-name" id="brandSystemName"></div>
-  </div>
-  <div class="tagline">Site Terminal</div>
+<div class="logo">FACE READER</div>
 </header>
-
-<div class="privacy-notice">🔒 Location tracking enabled for attendance verification</div>
-
+<div class="privacy-notice">Location tracking enabled for attendance verification</div>
 <div id="statusBox" class="status-box status-idle">Ready to sign in</div>
-
 <div class="card">
-<h2>🎥 Face Recognition</h2>
+<h2>Face Recognition</h2>
 <button type="button" class="btn-face" id="btnFace" onclick="startFaceScan()">Start Face Scan</button>
 <button type="button" class="btn-capture" id="btnCapture" onclick="captureFace()">Capture & Sign In</button>
 <video id="video" autoplay muted playsinline></video>
@@ -206,41 +196,33 @@ text-align:center;
 <span id="locationText">Acquiring location...</span>
 </div>
 </div>
-
 <div class="card">
-<h2> QR Code</h2>
+<h2>QR Code</h2>
 <div id="qr-reader"></div>
 <button type="button" class="btn-qr" id="btnQr" onclick="toggleQrScan()">Open Camera for QR</button>
 </div>
-
-<div class="footer" id="brandFooter">We Are A Team Together Ltd © 2026</div>
+<div class="footer">We Are A Team Together Ltd © 2026</div>
 </div>
-
 <script>
 const SITE_ID = "I";
 const firebaseConfig = {
-  apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj6O4zCBZw",
-  authDomain: "signin-facereader.firebaseapp.com",
-  databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "signin-facereader",
-  storageBucket: "signin-facereader.firebasestorage.app",
-  messagingSenderId: "815339415778",
-  appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
+apiKey: "AIzaSyCjpAPXDDsHHgAwVng535ZhDwj604zCBZw",
+authDomain: "signin-facereader.firebaseapp.com",
+databaseURL: "https://signin-facereader-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "signin-facereader",
+storageBucket: "signin-facereader.firebasestorage.app",
+messagingSenderId: "815339415778",
+appId: "1:815339415778:web:d4b131f38c8d6a42f716bb"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const signinsRef = db.ref('sites/' + SITE_ID + '/signins');
 const statusRef = db.ref('sites/' + SITE_ID + '/status');
 const faceDescriptorsRef = db.ref('sites/' + SITE_ID + '/faceDescriptors');
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
-const settingsRef = db.ref('settings/branding');
-
 let isFaceScanning = false, isQrScanning = false, videoStream = null, qrScanner = null;
 let faceDescriptors = {}, operatives = {}, modelsLoaded = false;
 let currentLocation = null;
-let currentLogoData = '';
-
 async function loadModels() {
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
 await Promise.all([
@@ -250,10 +232,8 @@ faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
 ]);
 modelsLoaded = true;
 }
-
 faceDescriptorsRef.on('value', snap => { faceDescriptors = {}; snap.forEach(child => { faceDescriptors[child.key] = child.val(); }); });
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); });
-
 function showStatus(msg, type, isHtml = false) {
 const box = document.getElementById('statusBox');
 if (isHtml) {
@@ -263,37 +243,33 @@ box.textContent = msg;
 }
 box.className = 'status-box status-' + type;
 }
-
 function showLocationInfo(text) {
 const locDiv = document.getElementById('locationInfo');
 const locText = document.getElementById('locationText');
 locText.textContent = text;
 locDiv.style.display = 'block';
 }
-
 function hideLocationInfo() {
 document.getElementById('locationInfo').style.display = 'none';
 }
-
 function getLocation() {
 return new Promise((resolve, reject) => {
 if (!navigator.geolocation) {
 reject(new Error('Geolocation not supported'));
 return;
 }
-showLocationInfo(' Acquiring location...');
+showLocationInfo('Acquiring location...');
 navigator.geolocation.getCurrentPosition(
 async (position) => {
 const lat = position.coords.latitude;
 const lng = position.coords.longitude;
 const accuracy = position.coords.accuracy;
-showLocationInfo(`📍 Location acquired (${accuracy.toFixed(0)}m accuracy)`);
+showLocationInfo(`Location acquired (${accuracy.toFixed(0)}m accuracy)`);
 try {
 const address = await reverseGeocode(lat, lng);
 resolve({ lat, lng, accuracy, address });
 } catch (err) {
 resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` });
-}
 },
 (error) => {
 hideLocationInfo();
@@ -303,7 +279,6 @@ reject(error);
 );
 });
 }
-
 async function reverseGeocode(lat, lng) {
 try {
 const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
@@ -325,7 +300,6 @@ console.error('Geocoding error:', err);
 return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 }
-
 async function startFaceScan() {
 if (!modelsLoaded) await loadModels();
 if (isQrScanning) stopQrScan();
@@ -333,14 +307,14 @@ try {
 currentLocation = await getLocation();
 } catch (err) {
 console.error('Location error:', err);
-showStatus('⚠️ Location access denied. Please enable location services.', 'error');
+showStatus('Location access denied. Please enable location services.', 'error');
 setTimeout(() => { showStatus('Ready to sign in', 'idle'); }, 3000);
 return;
 }
 isFaceScanning = true;
 document.getElementById('btnFace').style.display = 'none';
 document.getElementById('btnCapture').style.display = 'block';
-showStatus('👤 Position your face in the camera', 'scanning');
+showStatus('Position your face in the camera', 'scanning');
 try {
 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
 const video = document.getElementById('video');
@@ -350,11 +324,10 @@ await new Promise(r => { video.onloadedmetadata = () => { video.play(); r(); }; 
 detectFaceLoop();
 } catch (err) {
 hideLocationInfo();
-showStatus('❌ Camera error', 'error');
+showStatus('Camera error', 'error');
 stopFaceScan();
 }
 }
-
 function stopFaceScan() {
 isFaceScanning = false;
 document.getElementById('btnFace').style.display = 'block';
@@ -365,7 +338,6 @@ if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream =
 currentLocation = null;
 showStatus('Ready to sign in', 'idle');
 }
-
 async function detectFaceLoop() {
 if (!isFaceScanning) return;
 try {
@@ -386,15 +358,14 @@ setTimeout(() => { if (isFaceScanning) showStatus('Position your face in the cam
 } catch (err) { console.error(err); }
 if (isFaceScanning) setTimeout(detectFaceLoop, 500);
 }
-
 async function captureFace() {
-showStatus('⏳ Capturing...', 'info');
+showStatus('Capturing...', 'info');
 try {
 const video = document.getElementById('video');
 const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
 if (!detection) {
 hideLocationInfo();
-showStatus('️ No face detected', 'error');
+showStatus('No face detected', 'error');
 return;
 }
 const result = findBestMatch(detection.descriptor);
@@ -407,10 +378,9 @@ showStatus('Face not recognized - try QR', 'error');
 }
 } catch (err) {
 hideLocationInfo();
-showStatus('❌ Error', 'error');
+showStatus('Error', 'error');
 }
 }
-
 function findBestMatch(inputDescriptor) {
 const THRESHOLD = 0.75;
 for (const [id, data] of Object.entries(faceDescriptors)) {
@@ -418,25 +388,21 @@ const storedDescriptor = new Float32Array(data.descriptor);
 const distance = faceapi.euclideanDistance(inputDescriptor, storedDescriptor);
 if (distance < THRESHOLD) {
 const operative = operatives[id];
-if (operative) return { match: { id, name: operative.name, company: operative.company, assignedLocation: operative.assignedLocation } };
+if (operative) return { match: { id, name: operative.name, company: operative.company } };
 }
 }
 return { match: null };
 }
-
 async function recordSignin(operativeId, name, company, method) {
 try {
 const statusSnap = await statusRef.child(operativeId).once('value');
 const currentStatus = statusSnap.val();
 const isOnSite = currentStatus && currentStatus.onSite;
 const action = isOnSite ? 'OUT' : 'IN';
-const operative = operatives[operativeId];
-const assignedLocation = operative ? operative.assignedLocation : 'Unassigned';
 const signinData = {
 operativeId,
 operativeName: name,
 operativeCompany: company,
-assignedLocation: assignedLocation,
 action,
 method,
 timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -456,13 +422,12 @@ await statusRef.child(operativeId).set({
 onSite: action === 'IN',
 lastAction: action,
 lastTimestamp: firebase.database.ServerValue.TIMESTAMP,
-company: company,
-assignedLocation: assignedLocation
+company: company
 });
 const actionText = action === 'IN' ? 'SUCCESSFULLY SIGNED IN' : 'SUCCESSFULLY SIGNED OUT';
-const icon = action === 'IN' ? '✅' : '';
+const icon = action === 'IN' ? '✅' : '👋';
 const accentColor = action === 'IN' ? '#34d399' : '#fbbf24';
-const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;"> ${currentLocation.address}</div>` : '';
+const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;">${currentLocation.address}</div>` : '';
 const msg = `
 <div style="font-size: 22px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px; letter-spacing: 1px;">
 ${icon} ${actionText}
@@ -476,12 +441,10 @@ if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 setTimeout(() => { if (!isFaceScanning && !isQrScanning) showStatus('Ready to sign in', 'idle'); }, 6000);
 } catch (err) {
 hideLocationInfo();
-showStatus('❌ Error saving: ' + err.message, 'error');
+showStatus('Error saving: ' + err.message, 'error');
 }
 }
-
 function toggleQrScan() { if (isQrScanning) stopQrScan(); else startQrScan(); }
-
 async function startQrScan() {
 if (isFaceScanning) stopFaceScan();
 try {
@@ -492,7 +455,7 @@ console.error('Location error:', err);
 isQrScanning = true;
 document.getElementById('btnQr').classList.add('scanning');
 document.getElementById('btnQr').textContent = 'Stop QR Scan';
-showStatus('📷 Point camera at QR code', 'scanning');
+showStatus('Point camera at QR code', 'scanning');
 document.getElementById('qr-reader').style.display = 'block';
 qrScanner = new Html5Qrcode("qr-reader");
 qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 } },
@@ -504,7 +467,6 @@ showStatus('QR error', 'error');
 stopQrScan();
 });
 }
-
 function stopQrScan() {
 isQrScanning = false;
 document.getElementById('btnQr').classList.remove('scanning');
@@ -515,7 +477,6 @@ if (qrScanner) { try { qrScanner.stop(); } catch(e){} qrScanner = null; }
 currentLocation = null;
 showStatus('Ready to sign in', 'idle');
 }
-
 async function handleQrCode(qrData) {
 for (const [id, data] of Object.entries(operatives)) {
 if (data.qrCode === qrData || id === qrData) {
@@ -524,33 +485,8 @@ return;
 }
 }
 hideLocationInfo();
-showStatus(' Unknown QR code', 'error');
+showStatus('Unknown QR code', 'error');
 }
-
-// BRANDING LISTENER
-settingsRef.on('value', function(snap) {
-const data = snap.val();
-if (!data) return;
-document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
-document.documentElement.style.setProperty('--secondary-color', data.color2 || '#f97316');
-const logoEl = document.getElementById('brandLogo');
-const nameEl = document.getElementById('brandSystemName');
-if (logoEl) {
-currentLogoData = data.logoUrl || '';
-if (currentLogoData) {
-logoEl.innerHTML = '<img src="' + currentLogoData + '" alt="Logo">';
-if (nameEl) nameEl.textContent = data.name || '';
-} else {
-logoEl.innerHTML = '';
-logoEl.textContent = data.name || 'FACE READER';
-logoEl.style.color = data.color || '#06b6d4';
-if (nameEl) nameEl.textContent = '';
-}
-}
-const footerEl = document.getElementById('brandFooter');
-if (footerEl) footerEl.textContent = data.footer || 'We Are A Team Together Ltd © 2026';
-});
-
 loadModels();
 </script>
 </body>
