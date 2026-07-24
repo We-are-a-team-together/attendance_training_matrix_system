@@ -186,22 +186,26 @@ const assignedLocation = op.location || 'Unassigned';
 let gpsHtml = '<div style="color:#64748b; font-size:11px;">No GPS recorded</div>';
 if (r.location && r.location.address) {
 const mapUrl = 'https://www.google.com/maps?q=' + r.location.lat + ',' + r.location.lng;
-gpsHtml = '<div class="gps-location"> ' + escapeHtml(r.location.address) + '<a href="' + mapUrl + '" target="_blank" class="map-link">View Map</a></div>';
+gpsHtml = '<div class="gps-location">📍 ' + escapeHtml(r.location.address) + '<a href="' + mapUrl + '" target="_blank" class="map-link">View Map</a></div>';
 } else if (r.location && r.location.lat) {
 const mapUrl = 'https://www.google.com/maps?q=' + r.location.lat + ',' + r.location.lng;
 gpsHtml = '<div class="gps-location">' + r.location.lat.toFixed(4) + ', ' + r.location.lng.toFixed(4) + '<a href="' + mapUrl + '" target="_blank" class="map-link">View Map</a></div>';
 }
 
-const contactHtml = '<div style="font-weight:600; font-size:14px;">' + (op.phone ? '📞 ' + escapeHtml(op.phone) : '<span style="color:#64748b">No phone</span>') + '</div>' + (op.supervisor ? '<div style="font-size:12px; color:#94a3b8; margin-top:4px;">👤 ' + escapeHtml(op.supervisor) + '</div>' : '');
+const contactHtml = '<div style="font-weight:600; font-size:14px;">' + (op.phone ? ' ' + escapeHtml(op.phone) : '<span style="color:#64748b">No phone</span>') + '</div>' + (op.supervisor ? '<div style="font-size:12px; color:#94a3b8; margin-top:4px;">👤 ' + escapeHtml(op.supervisor) + '</div>' : '');
 const qualsHtml = '<div style="font-weight:600; font-size:14px;">' + (op.qualifications ? escapeHtml(op.qualifications) : '<span style="color:#64748b">None recorded</span>') + '</div>' + checkExpiry(op.qualExpiry);
 
+// --- OPERATIVE COLUMN WITH NAME AND COMPANY ---
+const operativeName = r.operativeName || 'Unknown';
+const operativeCompany = r.operativeCompany || op.company || 'No company';
+
 return '<tr>' +
-'<td><div style="font-weight:700; font-size:15px;">' + escapeHtml(r.operativeName) + '</div>' + (r.operativeCompany ? '<div style="font-size:12px; color:#f97316; margin-top:4px;">' + escapeHtml(r.operativeCompany) + '</div>' : '') + '</td>' +
+'<td><div style="font-weight:700; font-size:15px;">' + escapeHtml(operativeName) + '</div><div style="font-size:12px; color:#f97316; margin-top:4px;">' + escapeHtml(operativeCompany) + '</div></td>' +
 '<td>' + contactHtml + '</td>' +
 '<td>' + qualsHtml + '</td>' +
 '<td><span class="method-badge ' + methodClass + '">' + (r.method || 'Unknown') + '</span></td>' +
 '<td><span class="action-badge ' + actionClass + '">' + (r.action || 'Unknown') + '</span></td>' +
-'<td><div class="assigned-location"> Assigned: ' + escapeHtml(assignedLocation) + '</div>' + gpsHtml + '</td>' +
+'<td><div class="assigned-location">📍 Assigned: ' + escapeHtml(assignedLocation) + '</div>' + gpsHtml + '</td>' +
 '<td class="time">' + time + '<br><span style="font-size:11px; color:#64748b">' + timeAgo(r.timestamp) + '</span></td>' +
 '</tr>';
 }).join('');
@@ -255,7 +259,7 @@ const time = new Date(r.timestamp).toLocaleTimeString();
 const gpsLoc = r.location ? r.location.address || (r.location.lat + ',' + r.location.lng) : '';
 const lat = r.location ? r.location.lat : '';
 const lng = r.location ? r.location.lng : '';
-csv += '"' + date + '","' + time + '","' + (r.operativeName || '') + '","' + (r.operativeCompany || '') + '","' + (op.location || 'Unassigned') + '","' + (op.phone || '') + '","' + (op.supervisor || '') + '","' + (op.qualifications || '') + '","' + (op.qualExpiry || '') + '","' + (r.method || '') + '","' + (r.action || '') + '","' + gpsLoc + '","' + lat + '","' + lng + '"\n';
+csv += '"' + date + '","' + time + '","' + (r.operativeName || '') + '","' + (r.operativeCompany || op.company || '') + '","' + (op.location || 'Unassigned') + '","' + (op.phone || '') + '","' + (op.supervisor || '') + '","' + (op.qualifications || '') + '","' + (op.qualExpiry || '') + '","' + (r.method || '') + '","' + (r.action || '') + '","' + gpsLoc + '","' + lat + '","' + lng + '"\n';
 });
 const blob = new Blob([csv], { type: 'text/csv' });
 const url = URL.createObjectURL(blob);
@@ -266,7 +270,7 @@ a.click();
 }
 
 async function clearToday() {
-if (!confirm('⚠️ Reset dashboard for demo? This will delete today\'s records and reset the live status.')) return;
+if (!confirm('️ Reset dashboard for demo? This will delete today\'s records and reset the live status.')) return;
 const today = todayStart();
 const updates = {};
 allRecords.forEach(function(r) { if (r.timestamp && r.timestamp >= today) { updates['signins/' + r.id] = null; } });
