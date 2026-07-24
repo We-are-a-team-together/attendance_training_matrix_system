@@ -3,51 +3,220 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader - Admin Panel</title>
+<title>Face Reader Premium - Admin Panel</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
+:root { --primary-color: #06b6d4; --secondary-color: #10b981; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; position: relative; }
-.container { max-width:900px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
-header { display:flex; justify-content:space-between; align-items:center; padding:25px 0; margin-bottom:30px; border-bottom: 2px solid rgba(255,255,255,0.1); }
-.logo-container { display: flex; align-items: center; gap: 15px; }
-.logo { font-size:24px; font-weight:800; color: var(--primary-color, #06b6d4); display: flex; align-items: center; }
-.logo img { max-height: 50px; width: auto; }
-.system-name { font-size: 20px; font-weight: 700; color: #fff; }
-.badge { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:#fff; padding:8px 16px; border-radius:20px; font-size:12px; font-weight:700; text-transform: uppercase; }
-.card { background: rgba(30, 41, 59, 0.8); padding:30px; border-radius:20px; margin-bottom:25px; border: 1px solid rgba(255,255,255,0.1); }
-h2 { margin:0 0 25px; font-size:20px; color:#f1f5f9; font-weight:700; }
-.input-group { margin-bottom:20px; }
-label { display:block; font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:600; }
-input, select { width:100%; padding:14px 16px; border-radius:12px; border:2px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.6); color:#fff; font-size:15px; }
-input:focus, select:focus { outline: none; border-color: var(--primary-color, #06b6d4); }
-.btn-group { display:flex; gap:12px; flex-wrap:wrap; margin-top:25px; }
-button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cursor:pointer; color:#fff; text-transform: uppercase; font-size:14px; }
-.btn-save { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
-.btn-cancel { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
-.btn-edit { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding:10px 16px; font-size:12px; }
-.btn-delete { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding:10px 16px; font-size:12px; }
-.btn-register { display:block; width:100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding:20px; text-align:center; text-decoration:none; color:white; font-weight:700; border-radius:15px; margin-bottom:25px; }
-.operative-item { background: rgba(15, 23, 42, 0.6); padding:20px; border-radius:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:flex-start; border: 1px solid rgba(255,255,255,0.05); }
-.name { font-weight:700; font-size:17px; color:#f1f5f9; margin-bottom:5px; }
-.details { font-size:13px; color:#94a3b8; line-height: 1.5; }
+body { 
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+  color:#fff; 
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  min-height:100vh; 
+}
+.container { 
+  max-width:1400px; 
+  margin:0 auto; 
+  padding:30px 40px; 
+}
+header { 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  padding:25px 0; 
+  margin-bottom:30px; 
+  border-bottom: 2px solid rgba(255,255,255,0.1); 
+}
+.logo-container { display: flex; align-items: center; gap: 20px; }
+.logo { 
+  font-size:32px; 
+  font-weight:900; 
+  color: var(--primary-color); 
+  display: flex; 
+  align-items: center; 
+}
+.logo img { max-height: 60px; width: auto; }
+.system-name { font-size: 24px; font-weight: 700; color: #fff; }
+.badge { 
+  background: linear-gradient(135deg, #6366f1, #4f46e5); 
+  color:#fff; 
+  padding:8px 16px; 
+  border-radius:20px; 
+  font-size:12px; 
+  font-weight:700; 
+  text-transform: uppercase; 
+}
+.card { 
+  background: rgba(30, 41, 59, 0.8); 
+  padding:35px; 
+  border-radius:20px; 
+  margin-bottom:25px; 
+  border: 1px solid rgba(255,255,255,0.1); 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+h2 { 
+  margin:0 0 25px; 
+  font-size:22px; 
+  color:#f1f5f9; 
+  font-weight:700; 
+}
+.form-grid { 
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 20px; 
+}
+.form-group { margin-bottom:0; }
+label { 
+  display:block; 
+  font-size:12px; 
+  color:#94a3b8; 
+  text-transform:uppercase; 
+  letter-spacing:1px; 
+  margin-bottom:8px; 
+  font-weight:600; 
+}
+input { 
+  width:100%; 
+  padding:14px; 
+  border-radius:12px; 
+  border:2px solid rgba(255,255,255,0.1); 
+  background: rgba(15, 23, 42, 0.6); 
+  color:#fff; 
+  font-size:15px; 
+}
+input:focus { 
+  outline: none; 
+  border-color: var(--primary-color); 
+}
+.btn-group { 
+  display:flex; 
+  gap:12px; 
+  margin-top:25px; 
+  grid-column: 1 / -1; 
+}
+button { 
+  padding:14px 24px; 
+  border-radius:12px; 
+  border:none; 
+  font-weight:700; 
+  cursor:pointer; 
+  color:#fff; 
+  text-transform: uppercase; 
+  font-size:14px; 
+  transition: all 0.3s;
+}
+.btn-save { 
+  background: linear-gradient(135deg, #6366f1, #4f46e5); 
+}
+.btn-cancel { 
+  background: linear-gradient(135deg, #64748b, #475569); 
+}
+.btn-register { 
+  display:block; 
+  width:100%; 
+  background: linear-gradient(135deg, var(--secondary-color), #059669); 
+  padding:20px; 
+  text-align:center; 
+  text-decoration:none; 
+  color:white; 
+  font-weight:700; 
+  border-radius:15px; 
+  margin-bottom:25px; 
+  font-size:16px; 
+}
+.operative-list { 
+  display: grid; 
+  gap: 15px; 
+}
+.operative-item { 
+  background: rgba(15, 23, 42, 0.6); 
+  padding:25px; 
+  border-radius:15px; 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:flex-start; 
+  border: 1px solid rgba(255,255,255,0.05); 
+  transition: all 0.3s;
+}
+.operative-item:hover {
+  transform: translateX(5px);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+.operative-info { flex: 1; }
+.name { font-weight:700; font-size:18px; color:#f1f5f9; margin-bottom:8px; }
+.details { font-size:13px; color:#94a3b8; line-height: 1.8; }
 .company { color:#f97316; font-weight:600; }
 .location { color:#a855f7; font-weight:600; }
-.actions { display:flex; gap:10px; flex-shrink: 0; margin-left: 15px; }
-.status-msg { padding:16px 20px; border-radius:12px; text-align:center; font-weight:600; margin-bottom:25px; display:none; }
-.success { background: rgba(6, 78, 59, 0.6); color:#34d399; border: 1px solid rgba(52, 211, 153, 0.3); display:block; }
-.error { background: rgba(127, 29, 29, 0.6); color:#f87171; border: 1px solid rgba(248, 113, 113, 0.3); display:block; }
-.footer { text-align:center; font-size:12px; color:#64748b; margin-top:40px; padding:25px 0; border-top: 1px solid rgba(255,255,255,0.1); }
-.empty { text-align:center; color:#64748b; padding:40px; font-size:15px; }
-.filter-container { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+.actions { 
+  display:flex; 
+  gap:10px; 
+  flex-shrink: 0; 
+  margin-left: 20px; 
+}
+.btn-edit { 
+  background: linear-gradient(135deg, var(--primary-color), #0891b2); 
+  padding:10px 16px; 
+  font-size:12px; 
+}
+.btn-delete { 
+  background: linear-gradient(135deg, #ef4444, #dc2626); 
+  padding:10px 16px; 
+  font-size:12px; 
+}
+.status-msg { 
+  padding:16px; 
+  border-radius:12px; 
+  text-align:center; 
+  font-weight:600; 
+  margin-bottom:25px; 
+  display:none; 
+}
+.success { 
+  background: rgba(6, 78, 59, 0.6); 
+  color:#34d399; 
+  display:block; 
+}
+.error { 
+  background: rgba(127, 29, 29, 0.6); 
+  color:#f87171; 
+  display:block; 
+}
+.footer { 
+  text-align:center; 
+  font-size:12px; 
+  color:#64748b; 
+  margin-top:40px; 
+  padding:25px 0; 
+  border-top: 1px solid rgba(255,255,255,0.1); 
+}
+.empty { 
+  text-align:center; 
+  color:#64748b; 
+  padding:40px; 
+  font-size:15px; 
+}
+.filter-container { 
+  display: flex; 
+  gap: 15px; 
+  margin-bottom: 20px; 
+  align-items: center; 
+}
+select { 
+  padding:12px 16px; 
+  border-radius:12px; 
+  border:2px solid rgba(255,255,255,0.1); 
+  background: rgba(15, 23, 42, 0.6); 
+  color:#fff; 
+  font-size:14px; 
+}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
 <div class="logo-container">
-<div class="logo" id="brandLogo"></div>
+<div class="logo" id="brandLogo">FACE READER</div>
 <div class="system-name" id="brandSystemName"></div>
 </div>
 <div class="badge">Admin Panel</div>
@@ -58,30 +227,63 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <h2 id="formTitle">➕ Add / Edit Operative</h2>
 <form id="operativeForm">
 <input type="hidden" id="operativeId">
-<div class="input-group"><label>Full Name *</label><input type="text" id="name" required></div>
-<div class="input-group"><label>Company / Employer *</label><input type="text" id="company" required></div>
-<div class="input-group"><label>Assigned Location (e.g., Site A) *</label><input type="text" id="location" required></div>
-<div class="input-group"><label>Role / Job Title</label><input type="text" id="role"></div>
-<div class="input-group"><label>Phone Number</label><input type="tel" id="phone"></div>
-<div class="input-group"><label>Direct Line Manager / Supervisor</label><input type="text" id="supervisor"></div>
-<div class="input-group"><label>Qualifications</label><input type="text" id="qualifications"></div>
-<div class="input-group"><label>Qualification Expiry Date</label><input type="date" id="qualExpiry"></div>
-<div class="input-group"><label>QR Code ID (Optional)</label><input type="text" id="qrCode"></div>
+<div class="form-grid">
+<div class="form-group">
+<label>Full Name *</label>
+<input type="text" id="name" required>
+</div>
+<div class="form-group">
+<label>Company / Employer *</label>
+<input type="text" id="company" required>
+</div>
+<div class="form-group">
+<label>Assigned Location *</label>
+<input type="text" id="location" required>
+</div>
+<div class="form-group">
+<label>Role / Job Title</label>
+<input type="text" id="role">
+</div>
+<div class="form-group">
+<label>Phone Number</label>
+<input type="tel" id="phone">
+</div>
+<div class="form-group">
+<label>Direct Line Manager / Supervisor</label>
+<input type="text" id="supervisor">
+</div>
+<div class="form-group">
+<label>Qualifications</label>
+<input type="text" id="qualifications">
+</div>
+<div class="form-group">
+<label>Qualification Expiry Date</label>
+<input type="date" id="qualExpiry">
+</div>
+<div class="form-group">
+<label>QR Code ID (Optional)</label>
+<input type="text" id="qrCode">
+</div>
 <div class="btn-group">
 <button type="submit" class="btn-save">💾 Save Details</button>
 <button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
 </div>
+</div>
 </form>
 </div>
 <div class="card">
-<h2>👥 Registered Operatives (<span id="count">0</span>)</h2>
+<h2> Registered Operatives (<span id="count">0</span>)</h2>
 <div class="filter-container">
-<label style="color:#94a3b8;">Filter by Location:</label>
-<select id="adminLocationFilter" onchange="render()" style="width:auto; min-width:200px;"><option value="all">All Locations</option></select>
+<label>Filter by Location:</label>
+<select id="adminLocationFilter" onchange="render()">
+<option value="all">All Locations</option>
+</select>
 </div>
-<div id="operativeList"><div class="empty">Loading operatives...</div></div>
+<div id="operativeList" class="operative-list">
+<div class="empty">Loading operatives...</div>
 </div>
-<div class="footer" id="brandFooterText">Face Reader Premium © 2026</div>
+</div>
+<div class="footer" id="brandFooter">Face Reader Premium © 2026</div>
 </div>
 <script>
 const firebaseConfig = {
@@ -101,9 +303,11 @@ let operatives = {};
 
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
-  el.textContent = msg; el.className = 'status-msg ' + type; el.style.display = 'block';
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
   setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
+
 function resetForm() {
   document.getElementById('operativeForm').reset();
   document.getElementById('operativeId').value = '';
@@ -128,16 +332,26 @@ document.getElementById('operativeForm').addEventListener('submit', async (e) =>
   try {
     if (id) {
       await operativesRef.child(id).update(data);
-      await faceDescriptorsRef.child(id).update({ name: data.name, company: data.company, location: data.location });
+      await faceDescriptorsRef.child(id).update({ 
+        name: data.name, 
+        company: data.company, 
+        location: data.location 
+      });
       showStatus('✅ Updated successfully', 'success');
     } else {
       data.createdAt = firebase.database.ServerValue.TIMESTAMP;
       const newRef = await operativesRef.push(data);
-      await faceDescriptorsRef.child(newRef.key).set({ name: data.name, company: data.company, location: data.location });
+      await faceDescriptorsRef.child(newRef.key).set({ 
+        name: data.name, 
+        company: data.company, 
+        location: data.location 
+      });
       showStatus('✅ Added! Use Face Registration to capture face', 'success');
     }
     resetForm();
-  } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+  } catch (err) {
+    showStatus('❌ Error: ' + err.message, 'error');
+  }
 });
 
 function editOperative(id) {
@@ -162,7 +376,9 @@ async function deleteOperative(id) {
     await operativesRef.child(id).remove();
     await faceDescriptorsRef.child(id).remove();
     showStatus('✅ Deleted successfully', 'success');
-  } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+  } catch (err) {
+    showStatus('❌ Error: ' + err.message, 'error');
+  }
 }
 
 function render() {
@@ -171,24 +387,27 @@ function render() {
   let filteredList = locFilter !== 'all' ? list.filter(o => o.location === locFilter) : list;
   
   document.getElementById('count').textContent = filteredList.length;
-  if (filteredList.length === 0) { document.getElementById('operativeList').innerHTML = '<div class="empty">No operatives found.</div>'; return; }
+  if (filteredList.length === 0) { 
+    document.getElementById('operativeList').innerHTML = '<div class="empty">No operatives found.</div>'; 
+    return; 
+  }
   
   filteredList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   document.getElementById('operativeList').innerHTML = filteredList.map(o => `
     <div class="operative-item">
-      <div style="flex:1;">
+      <div class="operative-info">
         <div class="name">${o.name || 'Unnamed'}</div>
         <div class="details">
           <span class="location">📍 ${o.location || 'No location'}</span><br>
           <span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
-          ${o.phone ? '<br>📞 ' + o.phone : ''}
+          ${o.phone ? '<br> ' + o.phone : ''}
           ${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
           ${o.qualifications ? '<br>📜 Quals: ' + o.qualifications : ''}
           ${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
         </div>
       </div>
       <div class="actions">
-        <button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
+        <button class="btn-edit" onclick="editOperative('${o.id}')">️ Edit</button>
         <button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑️ Delete</button>
       </div>
     </div>
@@ -203,25 +422,40 @@ function updateAdminLocationDropdown() {
   select.innerHTML = '';
   Array.from(locations).sort().forEach(loc => {
     const opt = document.createElement('option');
-    opt.value = loc; opt.textContent = loc === 'all' ? 'All Locations' : loc;
+    opt.value = loc;
+    opt.textContent = loc === 'all' ? 'All Locations' : loc;
     select.appendChild(opt);
   });
   select.value = locations.has(currentVal) ? currentVal : 'all';
 }
 
-settingsRef.on('value', snap => {
-  const data = snap.val(); if (!data) return;
+// Branding System
+function applyBranding(data) {
+  if (!data) return;
   document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
   document.documentElement.style.setProperty('--secondary-color', data.color2 || '#10b981');
   const logoEl = document.getElementById('brandLogo');
   const nameEl = document.getElementById('brandSystemName');
   if (logoEl) {
-    if (data.logoUrl) logoEl.innerHTML = `<img src="${data.logoUrl}">`;
-    else { logoEl.textContent = data.name || 'FACE READER'; logoEl.style.color = data.color; }
+    if (data.logoUrl) {
+      logoEl.innerHTML = `<img src="${data.logoUrl}" alt="Logo">`;
+    } else {
+      logoEl.textContent = data.name || 'FACE READER';
+      logoEl.style.color = data.color;
+    }
   }
   if (nameEl) nameEl.textContent = data.name || '';
-  const footerEl = document.getElementById('brandFooterText');
+  const footerEl = document.getElementById('brandFooter');
   if (footerEl) footerEl.textContent = data.footer || 'Face Reader Premium © 2026';
+  document.title = (data.name || 'Face Reader Premium') + ' - Admin Panel';
+}
+
+settingsRef.on('value', snap => {
+  const data = snap.val();
+  if (data) applyBranding(data);
+  else {
+    document.title = 'Face Reader Premium - Admin Panel';
+  }
 });
 
 operativesRef.on('value', snap => {
