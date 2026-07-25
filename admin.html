@@ -89,8 +89,6 @@ const firebaseConfig = {
   messagingSenderId: "50216820353",
   appId: "1:50216820353:web:0ee63035cfafc12759f780"
 };
-<script>
-const SITE_ID = "I";
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
