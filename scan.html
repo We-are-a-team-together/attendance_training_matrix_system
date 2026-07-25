@@ -161,7 +161,7 @@ async function captureFace() {
 }
 
 function findBestMatch(inputDescriptor) {
-  const THRESHOLD = 0.75;
+  const THRESHOLD = 0.50;
   for (const [id, data] of Object.entries(faceDescriptors)) {
     const distance = faceapi.euclideanDistance(inputDescriptor, new Float32Array(data.descriptor));
     if (distance < THRESHOLD) { const operative = operatives[id]; if (operative) return { match: { id, name: operative.name, company: operative.company, location: operative.location } }; }
