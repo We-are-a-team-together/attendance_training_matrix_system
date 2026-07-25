@@ -13,27 +13,8 @@
 body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; position: relative; overflow-x: hidden; }
 .container { max-width:600px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
 header { text-align:center; padding:30px 0; margin-bottom:20px; }
-/* NEW TITLE STYLES */
-.main-title {
-font-size: 42px;
-font-weight: 900;
-background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
-letter-spacing: 1px;
-text-shadow: 0 0 30px rgba(6, 182, 212, 0.4);
-margin-bottom: 5px;
-line-height: 1.2;
-}
-.subtitle {
-font-size: 13px;
-color: #94a3b8;
-letter-spacing: 4px;
-text-transform: uppercase;
-font-weight: 600;
-margin-top: 5px;
-}
+.main-title { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px; text-shadow: 0 0 30px rgba(6, 182, 212, 0.4); margin-bottom: 5px; line-height: 1.2; }
+.subtitle { font-size: 13px; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; font-weight: 600; margin-top: 5px; }
 .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding:25px; border-radius:20px; margin-bottom:20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
 h2 { margin:0 0 20px; font-size:13px; color:#94a3b8; text-transform:uppercase; letter-spacing:2px; font-weight:700; }
 button { width:100%; padding:18px; margin:10px 0; border-radius:12px; border:none; font-weight:700; cursor:pointer; color:#fff; font-size:16px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
@@ -94,134 +75,163 @@ const operativesRef = db.ref('sites/' + SITE_ID + '/operatives');
 let isFaceScanning = false, isQrScanning = false, videoStream = null, qrScanner = null;
 let faceDescriptors = {}, operatives = {}, modelsLoaded = false;
 let currentLocation = null;
+
 async function loadModels() {
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
-await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL) ]);
-modelsLoaded = true;
+  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+  await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL) ]);
+  modelsLoaded = true;
 }
 faceDescriptorsRef.on('value', snap => { faceDescriptors = {}; snap.forEach(child => { faceDescriptors[child.key] = child.val(); }); });
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); });
+
 function showStatus(msg, type, isHtml = false) { const box = document.getElementById('statusBox'); if (isHtml) box.innerHTML = msg; else box.textContent = msg; box.className = 'status-box status-' + type; }
 function showLocationInfo(text) { document.getElementById('locationText').textContent = text; document.getElementById('locationInfo').style.display = 'block'; }
 function hideLocationInfo() { document.getElementById('locationInfo').style.display = 'none'; }
+
 function getLocation() {
-return new Promise((resolve, reject) => {
-if (!navigator.geolocation) { reject(new Error('Geolocation not supported')); return; }
-showLocationInfo('📍 Acquiring location...');
-navigator.geolocation.getCurrentPosition(async (position) => {
-const lat = position.coords.latitude; const lng = position.coords.longitude; const accuracy = position.coords.accuracy;
-showLocationInfo(`📍 Location acquired (${accuracy.toFixed(0)}m accuracy)`);
-try {
-const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'FaceReader Attendance' } });
-const data = await response.json();
-if (data.display_name) {
-const addr = data.address; const parts = [];
-if (addr.road) parts.push(addr.road); if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
-if (addr.postcode) parts.push(addr.postcode);
-resolve({ lat, lng, accuracy, address: parts.join(', ') || data.display_name });
-} else { resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }); }
-} catch (err) { resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }); }
-}, (error) => { hideLocationInfo(); reject(error); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
-});
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) { reject(new Error('Geolocation not supported')); return; }
+    showLocationInfo('📍 Acquiring location...');
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude; const lng = position.coords.longitude; const accuracy = position.coords.accuracy;
+      showLocationInfo(`📍 Location acquired (${accuracy.toFixed(0)}m accuracy)`);
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'User-Agent': 'FaceReader Attendance' } });
+        const data = await response.json();
+        if (data.display_name) {
+          const addr = data.address; const parts = [];
+          if (addr.road) parts.push(addr.road); if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
+          if (addr.postcode) parts.push(addr.postcode);
+          resolve({ lat, lng, accuracy, address: parts.join(', ') || data.display_name });
+        } else { resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }); }
+      } catch (err) { resolve({ lat, lng, accuracy, address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }); }
+    }, (error) => { hideLocationInfo(); reject(error); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  });
 }
+
 async function startFaceScan() {
-if (!modelsLoaded) await loadModels();
-if (isQrScanning) stopQrScan();
-try { currentLocation = await getLocation(); } catch (err) { showStatus('⚠️ Location access denied.', 'error'); setTimeout(() => showStatus('Ready to sign in', 'idle'), 3000); return; }
-isFaceScanning = true;
-document.getElementById('btnFace').style.display = 'none'; document.getElementById('btnCapture').style.display = 'block';
-showStatus('👤 Position your face in the camera', 'scanning');
-try {
-videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
-const video = document.getElementById('video');
-video.srcObject = videoStream; video.style.display = 'block';
-await new Promise(r => { video.onloadedmetadata = () => { video.play(); r(); }; });
-detectFaceLoop();
-} catch (err) { hideLocationInfo(); showStatus('❌ Camera error', 'error'); stopFaceScan(); }
+  if (!modelsLoaded) await loadModels();
+  if (isQrScanning) stopQrScan();
+  try { currentLocation = await getLocation(); } catch (err) { showStatus('⚠️ Location access denied.', 'error'); setTimeout(() => showStatus('Ready to sign in', 'idle'), 3000); return; }
+  isFaceScanning = true;
+  document.getElementById('btnFace').style.display = 'none'; document.getElementById('btnCapture').style.display = 'block';
+  showStatus('👤 Position your face in the camera', 'scanning');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+    const video = document.getElementById('video');
+    video.srcObject = videoStream; video.style.display = 'block';
+    await new Promise(r => { video.onloadedmetadata = () => { video.play(); r(); }; });
+    detectFaceLoop();
+  } catch (err) { hideLocationInfo(); showStatus('❌ Camera error', 'error'); stopFaceScan(); }
 }
+
 function stopFaceScan() {
-isFaceScanning = false;
-document.getElementById('btnFace').style.display = 'block'; document.getElementById('btnCapture').style.display = 'none'; document.getElementById('video').style.display = 'none';
-hideLocationInfo();
-if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
-currentLocation = null;
-showStatus('Ready to sign in', 'idle');
+  isFaceScanning = false;
+  document.getElementById('btnFace').style.display = 'block'; document.getElementById('btnCapture').style.display = 'none'; document.getElementById('video').style.display = 'none';
+  hideLocationInfo();
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  currentLocation = null;
+  showStatus('Ready to sign in', 'idle');
 }
+
 async function detectFaceLoop() {
-if (!isFaceScanning) return;
-try {
-const video = document.getElementById('video');
-if (!video || video.readyState !== 4) { setTimeout(detectFaceLoop, 500); return; }
-const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-if (detection) {
-const result = findBestMatch(detection.descriptor);
-if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE'); stopFaceScan(); }
-else { hideLocationInfo(); showStatus('Face not recognized - try QR code', 'error'); setTimeout(() => { if (isFaceScanning) showStatus('Position your face in the camera', 'scanning'); }, 3000); }
+  if (!isFaceScanning) return;
+  try {
+    const video = document.getElementById('video');
+    if (!video || video.readyState !== 4) { setTimeout(detectFaceLoop, 500); return; }
+    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+    if (detection) {
+      const result = findBestMatch(detection.descriptor);
+      if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, result.match.location, 'FACE'); stopFaceScan(); }
+      else { hideLocationInfo(); showStatus('Face not recognized - try QR code', 'error'); setTimeout(() => { if (isFaceScanning) showStatus('Position your face in the camera', 'scanning'); }, 3000); }
+    }
+  } catch (err) { console.error(err); }
+  if (isFaceScanning) setTimeout(detectFaceLoop, 500);
 }
-} catch (err) { console.error(err); }
-if (isFaceScanning) setTimeout(detectFaceLoop, 500);
-}
+
 async function captureFace() {
-showStatus('⏳ Capturing...', 'info');
-try {
-const detection = await faceapi.detectSingleFace(document.getElementById('video'), new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-if (!detection) { hideLocationInfo(); showStatus('⚠️ No face detected', 'error'); return; }
-const result = findBestMatch(detection.descriptor);
-if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE'); stopFaceScan(); }
-else { hideLocationInfo(); showStatus('Face not recognized - try QR', 'error'); }
-} catch (err) { hideLocationInfo(); showStatus('❌ Error', 'error'); }
+  showStatus('⏳ Capturing...', 'info');
+  try {
+    const detection = await faceapi.detectSingleFace(document.getElementById('video'), new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+    if (!detection) { hideLocationInfo(); showStatus('⚠️ No face detected', 'error'); return; }
+    const result = findBestMatch(detection.descriptor);
+    if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, result.match.location, 'FACE'); stopFaceScan(); }
+    else { hideLocationInfo(); showStatus('Face not recognized - try QR', 'error'); }
+  } catch (err) { hideLocationInfo(); showStatus('❌ Error', 'error'); }
 }
+
 function findBestMatch(inputDescriptor) {
-const THRESHOLD = 0.75;
-for (const [id, data] of Object.entries(faceDescriptors)) {
-const distance = faceapi.euclideanDistance(inputDescriptor, new Float32Array(data.descriptor));
-if (distance < THRESHOLD) { const operative = operatives[id]; if (operative) return { match: { id, name: operative.name, company: operative.company } }; }
+  const THRESHOLD = 0.75;
+  for (const [id, data] of Object.entries(faceDescriptors)) {
+    const distance = faceapi.euclideanDistance(inputDescriptor, new Float32Array(data.descriptor));
+    if (distance < THRESHOLD) { const operative = operatives[id]; if (operative) return { match: { id, name: operative.name, company: operative.company, location: operative.location } }; }
+  }
+  return { match: null };
 }
-return { match: null };
+
+async function recordSignin(operativeId, name, company, assignedLocation, method) {
+  try {
+    const statusSnap = await statusRef.child(operativeId).once('value');
+    const currentStatus = statusSnap.val();
+    const action = (currentStatus && currentStatus.onSite) ? 'OUT' : 'IN';
+    
+    const signinData = { 
+      operativeId, 
+      operativeName: name, 
+      operativeCompany: company, 
+      assignedLocation: assignedLocation || 'Unassigned',
+      action, 
+      method, 
+      timestamp: firebase.database.ServerValue.TIMESTAMP, 
+      date: new Date().toISOString().slice(0,10) 
+    };
+    if (currentLocation) { signinData.location = { lat: currentLocation.lat, lng: currentLocation.lng, accuracy: currentLocation.accuracy, address: currentLocation.address, timestamp: Date.now() }; }
+    
+    await signinsRef.push(signinData);
+    await statusRef.child(operativeId).set({ 
+      onSite: action === 'IN', 
+      lastAction: action, 
+      lastTimestamp: firebase.database.ServerValue.TIMESTAMP, 
+      company: company,
+      assignedLocation: assignedLocation || 'Unassigned'
+    });
+    
+    const actionText = action === 'IN' ? 'SUCCESSFULLY SIGNED IN' : 'SUCCESSFULLY SIGNED OUT';
+    const icon = action === 'IN' ? '✅' : '👋';
+    const accentColor = action === 'IN' ? '#34d399' : '#fbbf24';
+    const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;">📍 ${currentLocation.address}</div>` : '';
+    const msg = `<div style="font-size: 22px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px;">${icon} ${actionText}</div><div style="font-size: 18px; font-weight: 600; color: #fff;">${name}</div><div style="font-size: 14px; color: #94a3b8;">${company}</div>${locText}`;
+    
+    showStatus(msg, 'success', true);
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    setTimeout(() => { if (!isFaceScanning && !isQrScanning) showStatus('Ready to sign in', 'idle'); }, 6000);
+  } catch (err) { hideLocationInfo(); showStatus('❌ Error saving: ' + err.message, 'error'); }
 }
-async function recordSignin(operativeId, name, company, method) {
-try {
-const statusSnap = await statusRef.child(operativeId).once('value');
-const currentStatus = statusSnap.val();
-const action = (currentStatus && currentStatus.onSite) ? 'OUT' : 'IN';
-const signinData = { operativeId, operativeName: name, operativeCompany: company, action, method, timestamp: firebase.database.ServerValue.TIMESTAMP, date: new Date().toISOString().slice(0,10) };
-if (currentLocation) { signinData.location = { lat: currentLocation.lat, lng: currentLocation.lng, accuracy: currentLocation.accuracy, address: currentLocation.address, timestamp: Date.now() }; }
-await signinsRef.push(signinData);
-await statusRef.child(operativeId).set({ onSite: action === 'IN', lastAction: action, lastTimestamp: firebase.database.ServerValue.TIMESTAMP, company: company });
-const actionText = action === 'IN' ? 'SUCCESSFULLY SIGNED IN' : 'SUCCESSFULLY SIGNED OUT';
-const icon = action === 'IN' ? '✅' : '👋';
-const accentColor = action === 'IN' ? '#34d399' : '#fbbf24';
-const locText = currentLocation ? `<div style="font-size: 13px; color: #a5b4fc; margin-top: 8px;">📍 ${currentLocation.address}</div>` : '';
-const msg = `<div style="font-size: 22px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px;">${icon} ${actionText}</div><div style="font-size: 18px; font-weight: 600; color: #fff;">${name}</div><div style="font-size: 14px; color: #94a3b8;">${company}</div>${locText}`;
-showStatus(msg, 'success', true);
-if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-setTimeout(() => { if (!isFaceScanning && !isQrScanning) showStatus('Ready to sign in', 'idle'); }, 6000);
-} catch (err) { hideLocationInfo(); showStatus('❌ Error saving: ' + err.message, 'error'); }
-}
+
 function toggleQrScan() { if (isQrScanning) stopQrScan(); else startQrScan(); }
 async function startQrScan() {
-if (isFaceScanning) stopFaceScan();
-try { currentLocation = await getLocation(); } catch (err) { console.error('Location error:', err); }
-isQrScanning = true;
-document.getElementById('btnQr').textContent = 'Stop QR Scan';
-showStatus('📷 Point camera at QR code', 'scanning');
-document.getElementById('qr-reader').style.display = 'block';
-qrScanner = new Html5Qrcode("qr-reader");
-qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 } }, (decodedText) => { handleQrCode(decodedText); stopQrScan(); }, () => {}).catch(err => { hideLocationInfo(); showStatus('QR error', 'error'); stopQrScan(); });
+  if (isFaceScanning) stopFaceScan();
+  try { currentLocation = await getLocation(); } catch (err) { console.error('Location error:', err); }
+  isQrScanning = true;
+  document.getElementById('btnQr').textContent = 'Stop QR Scan';
+  showStatus('📷 Point camera at QR code', 'scanning');
+  document.getElementById('qr-reader').style.display = 'block';
+  qrScanner = new Html5Qrcode("qr-reader");
+  qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 } }, (decodedText) => { handleQrCode(decodedText); stopQrScan(); }, () => {}).catch(err => { hideLocationInfo(); showStatus('QR error', 'error'); stopQrScan(); });
 }
 function stopQrScan() {
-isQrScanning = false;
-document.getElementById('btnQr').textContent = 'Open Camera for QR'; document.getElementById('qr-reader').style.display = 'none';
-hideLocationInfo();
-if (qrScanner) { try { qrScanner.stop(); } catch(e){} qrScanner = null; }
-currentLocation = null;
-showStatus('Ready to sign in', 'idle');
+  isQrScanning = false;
+  document.getElementById('btnQr').textContent = 'Open Camera for QR'; document.getElementById('qr-reader').style.display = 'none';
+  hideLocationInfo();
+  if (qrScanner) { try { qrScanner.stop(); } catch(e){} qrScanner = null; }
+  currentLocation = null;
+  showStatus('Ready to sign in', 'idle');
 }
 async function handleQrCode(qrData) {
-for (const [id, data] of Object.entries(operatives)) {
-if (data.qrCode === qrData || id === qrData) { await recordSignin(id, data.name, data.company, 'QR'); return; }
-}
-hideLocationInfo(); showStatus('❌ Unknown QR code', 'error');
+  for (const [id, data] of Object.entries(operatives)) {
+    if (data.qrCode === qrData || id === qrData) { await recordSignin(id, data.name, data.company, data.location, 'QR'); return; }
+  }
+  hideLocationInfo(); showStatus('❌ Unknown QR code', 'error');
 }
 loadModels();
 </script>
