@@ -183,22 +183,37 @@ function render() {
   `).join('');
 }
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); render(); });
-// --- BRANDING LISTENER (LISTENS TO THE BRAIN) ---
-function applyBranding(data) {
-if (!data) return;
-document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
-document.documentElement.style.setProperty('--secondary-color', data.color2 || '#10b981');
-const logoEl = document.getElementById('brandLogo');
-const nameEl = document.getElementById('brandSystemName');
-if (logoEl) {
-if (data.logoUrl) logoEl.innerHTML = `<img src="${data.logoUrl}">`;
-else { logoEl.textContent = data.name || 'FACE READER'; logoEl.style.color = data.color; }
-}
-if (nameEl) nameEl.textContent = data.name || '';
-const footerEl = document.getElementById('brandFooterText');
-if (footerEl) footerEl.textContent = data.footer || 'Face Reader Basic © 2026';
-}
-settingsRef.on('value', snap => applyBranding(snap.val()));
+// ==========================================
+// BRANDING LISTENER (LISTENS TO OFFICE.HTML)
+// ==========================================
+const settingsRef = db.ref('settings/branding');
+settingsRef.on('value', snap => {
+  const data = snap.val();
+  if (!data) return;
+  
+  // 1. Update Theme Colors
+  document.documentElement.style.setProperty('--primary-color', data.color || '#06b6d4');
+  document.documentElement.style.setProperty('--secondary-color', data.color2 || '#10b981');
+  
+  // 2. Update Footer Text
+  const footerEl = document.getElementById('brandFooterText') || document.getElementById('brandFooter');
+  if (footerEl) footerEl.textContent = data.footer || 'Face Reader Premium © 2026';
+
+  // 3. Update Logo and System Name (if the IDs exist in your HTML)
+  const logoEl = document.getElementById('brandLogo');
+  const nameEl = document.getElementById('brandSystemName');
+  if (logoEl) {
+    if (data.logoUrl) {
+      logoEl.innerHTML = `<img src="${data.logoUrl}" style="max-height:50px; width:auto;">`;
+    } else {
+      logoEl.textContent = data.name || 'FACE READER';
+      logoEl.style.color = data.color || '#06b6d4';
+    }
+  }
+  if (nameEl) {
+    nameEl.textContent = data.name || '';
+  }
+});
 </script>
 </body>
 </html>
