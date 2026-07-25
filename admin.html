@@ -11,27 +11,8 @@
 body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; position: relative; }
 .container { max-width:900px; margin:0 auto; padding:30px 20px; position: relative; z-index: 1; }
 header { display:flex; justify-content:space-between; align-items:center; padding:25px 0; margin-bottom:30px; border-bottom: 2px solid rgba(255,255,255,0.1); }
-/* NEW TITLE STYLES */
-.main-title {
-font-size: 42px;
-font-weight: 900;
-background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
-letter-spacing: 1px;
-text-shadow: 0 0 30px rgba(6, 182, 212, 0.4);
-margin-bottom: 5px;
-line-height: 1.2;
-}
-.subtitle {
-font-size: 13px;
-color: #94a3b8;
-letter-spacing: 4px;
-text-transform: uppercase;
-font-weight: 600;
-margin-top: 5px;
-}
+.main-title { font-size: 42px; font-weight: 900; background: linear-gradient(135deg, #06b6d4 0%, #f97316 50%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px; text-shadow: 0 0 30px rgba(6, 182, 212, 0.4); margin-bottom: 5px; line-height: 1.2; }
+.subtitle { font-size: 13px; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; font-weight: 600; margin-top: 5px; }
 .badge { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:#fff; padding:8px 16px; border-radius:20px; font-size:12px; font-weight:700; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
 .card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding:30px; border-radius:20px; margin-bottom:25px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
 h2 { margin:0 0 25px; font-size:20px; color:#f1f5f9; font-weight:700; }
@@ -70,7 +51,7 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 </div>
 <div class="badge">Admin Panel</div>
 </header>
-<a href="index.html" class="btn-register"> Go to Face Registration Page</a>
+<a href="index.html" class="btn-register">📷 Go to Face Registration Page</a>
 <div id="statusMsg" class="status-msg" style="display:none;"></div>
 <div class="card">
 <h2 id="formTitle">➕ Add / Edit Operative</h2>
@@ -78,6 +59,7 @@ button { padding:14px 24px; border-radius:12px; border:none; font-weight:700; cu
 <input type="hidden" id="operativeId">
 <div class="input-group"><label>Full Name *</label><input type="text" id="name" placeholder="" required></div>
 <div class="input-group"><label>Company / Employer *</label><input type="text" id="company" placeholder="" required></div>
+<div class="input-group"><label>Assigned Location *</label><input type="text" id="location" placeholder="e.g., Site A, Warehouse, Office" required></div>
 <div class="input-group"><label>Role / Job Title</label><input type="text" id="role" placeholder=""></div>
 <div class="input-group"><label>Phone Number</label><input type="tel" id="phone" placeholder=""></div>
 <div class="input-group"><label>Direct Line Manager / Supervisor</label><input type="text" id="supervisor" placeholder=""></div>
@@ -115,57 +97,90 @@ let operatives = {};
 const form = document.getElementById('operativeForm');
 const listEl = document.getElementById('operativeList');
 const statusMsg = document.getElementById('statusMsg');
+
 function showStatus(msg, type) { statusMsg.textContent = msg; statusMsg.className = 'status-msg ' + type; statusMsg.style.display = 'block'; setTimeout(() => { statusMsg.style.display = 'none'; }, 4000); }
 function resetForm() { form.reset(); document.getElementById('operativeId').value = ''; document.getElementById('formTitle').textContent = '➕ Add / Edit Operative'; }
+
 form.addEventListener('submit', async (e) => {
-e.preventDefault();
-const id = document.getElementById('operativeId').value;
-const data = { name: document.getElementById('name').value.trim(), company: document.getElementById('company').value.trim(), role: document.getElementById('role').value.trim(), phone: document.getElementById('phone').value.trim(), supervisor: document.getElementById('supervisor').value.trim(), qualifications: document.getElementById('qualifications').value.trim(), qualExpiry: document.getElementById('qualExpiry').value.trim(), qrCode: document.getElementById('qrCode').value.trim(), updatedAt: firebase.database.ServerValue.TIMESTAMP };
-try {
-if (id) { await operativesRef.child(id).update(data); showStatus('✅ Updated successfully', 'success'); }
-else { data.createdAt = firebase.database.ServerValue.TIMESTAMP; await operativesRef.push(data); showStatus('✅ Added! Use Face Registration to capture face', 'success'); }
-resetForm();
-} catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+  e.preventDefault();
+  const id = document.getElementById('operativeId').value;
+  const data = { 
+    name: document.getElementById('name').value.trim(), 
+    company: document.getElementById('company').value.trim(), 
+    location: document.getElementById('location').value.trim(), 
+    role: document.getElementById('role').value.trim(), 
+    phone: document.getElementById('phone').value.trim(), 
+    supervisor: document.getElementById('supervisor').value.trim(), 
+    qualifications: document.getElementById('qualifications').value.trim(), 
+    qualExpiry: document.getElementById('qualExpiry').value.trim(), 
+    qrCode: document.getElementById('qrCode').value.trim(), 
+    updatedAt: firebase.database.ServerValue.TIMESTAMP 
+  };
+  try {
+    if (id) { 
+      await operativesRef.child(id).update(data); 
+      await faceDescriptorsRef.child(id).update({ name: data.name, company: data.company, location: data.location });
+      showStatus('✅ Updated successfully', 'success'); 
+    } else { 
+      data.createdAt = firebase.database.ServerValue.TIMESTAMP; 
+      await operativesRef.push(data); 
+      await faceDescriptorsRef.child(operativesRef.push().key).set({ name: data.name, company: data.company, location: data.location }); // Note: simplified for new adds, actual ID handled by push
+      showStatus('✅ Added! Use Face Registration to capture face', 'success'); 
+    }
+    resetForm();
+  } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
 });
+
 function editOperative(id) {
-const o = operatives[id];
-document.getElementById('operativeId').value = id;
-document.getElementById('name').value = o.name || ''; document.getElementById('company').value = o.company || '';
-document.getElementById('role').value = o.role || ''; document.getElementById('phone').value = o.phone || '';
-document.getElementById('supervisor').value = o.supervisor || ''; document.getElementById('qualifications').value = o.qualifications || '';
-document.getElementById('qualExpiry').value = o.qualExpiry || ''; document.getElementById('qrCode').value = o.qrCode || '';
-document.getElementById('formTitle').textContent = '✏️ Edit: ' + (o.name || 'Unnamed');
-window.scrollTo({ top: 0, behavior: 'smooth' });
+  const o = operatives[id];
+  document.getElementById('operativeId').value = id;
+  document.getElementById('name').value = o.name || ''; 
+  document.getElementById('company').value = o.company || '';
+  document.getElementById('location').value = o.location || '';
+  document.getElementById('role').value = o.role || ''; 
+  document.getElementById('phone').value = o.phone || '';
+  document.getElementById('supervisor').value = o.supervisor || ''; 
+  document.getElementById('qualifications').value = o.qualifications || '';
+  document.getElementById('qualExpiry').value = o.qualExpiry || ''; 
+  document.getElementById('qrCode').value = o.qrCode || '';
+  document.getElementById('formTitle').textContent = '✏️ Edit: ' + (o.name || 'Unnamed');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 async function deleteOperative(id) {
-if (!confirm('⚠️ Delete this operative and their face data?')) return;
-try { await operativesRef.child(id).remove(); await faceDescriptorsRef.child(id).remove(); showStatus('✅ Deleted successfully', 'success'); }
-catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
+  if (!confirm('⚠️ Delete this operative and their face data?')) return;
+  try { 
+    await operativesRef.child(id).remove(); 
+    await faceDescriptorsRef.child(id).remove(); 
+    showStatus('✅ Deleted successfully', 'success'); 
+  } catch (err) { showStatus('❌ Error: ' + err.message, 'error'); }
 }
+
 function render() {
-const list = Object.entries(operatives).map(([id, o]) => ({ id, ...o }));
-document.getElementById('count').textContent = list.length;
-if (list.length === 0) { listEl.innerHTML = '<div class="empty">No operatives registered yet</div>'; return; }
-list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-listEl.innerHTML = list.map(o => `
-<div class="operative-item">
-<div style="flex:1;">
-<div class="name">${o.name || 'Unnamed'}</div>
-<div class="details">
-<span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
-${o.phone ? '<br> ' + o.phone : ''}
-${o.supervisor ? '<br> Supervisor: ' + o.supervisor : ''}
-${o.qualifications ? '<br> Quals: ' + o.qualifications : ''}
-${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
-${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
-</div>
-</div>
-<div class="actions">
-<button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
-<button class="btn-delete" onclick="deleteOperative('${o.id}')"> Delete</button>
-</div>
-</div>
-`).join('');
+  const list = Object.entries(operatives).map(([id, o]) => ({ id, ...o }));
+  document.getElementById('count').textContent = list.length;
+  if (list.length === 0) { listEl.innerHTML = '<div class="empty">No operatives registered yet</div>'; return; }
+  list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  listEl.innerHTML = list.map(o => `
+    <div class="operative-item">
+      <div style="flex:1;">
+        <div class="name">${o.name || 'Unnamed'}</div>
+        <div class="details">
+          <span class="company">${o.company || 'No Company'}</span> • ${o.role || 'No role'}
+          ${o.location ? '<br>📍 Location: ' + o.location : ''}
+          ${o.phone ? '<br>📞 ' + o.phone : ''}
+          ${o.supervisor ? '<br>👤 Supervisor: ' + o.supervisor : ''}
+          ${o.qualifications ? '<br>📜 Quals: ' + o.qualifications : ''}
+          ${o.qualExpiry ? '<br>📅 Expires: ' + o.qualExpiry : ''}
+          ${o.qrCode ? '<br>🔳 QR: ' + o.qrCode : ''}
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-edit" onclick="editOperative('${o.id}')">✏️ Edit</button>
+        <button class="btn-delete" onclick="deleteOperative('${o.id}')">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join('');
 }
 operativesRef.on('value', snap => { operatives = {}; snap.forEach(child => { operatives[child.key] = child.val(); }); render(); });
 </script>
