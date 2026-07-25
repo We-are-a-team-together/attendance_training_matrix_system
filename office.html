@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Reader - Office Dashboard</title>
+<title>Face Reader Premium - Office Dashboard</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -188,8 +188,9 @@ body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: 
 </div>
 <button class="btn-save-brand" onclick="saveBranding()">💾 Save Branding to All Pages</button>
 </div>
-<div class="footer" id="brandFooterText">Face Reader Basic - We are a team together Ltd ©️ 2026</div>
+<div class="footer" id="brandFooterText">Face Reader Premium © 2026</div>
 </div>
+
 <div id="dateModal" class="modal-overlay">
 <div class="modal-content">
 <h3>📅 Export Records</h3>
@@ -203,10 +204,11 @@ body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: 
 </div>
 </div>
 </div>
+
 <div id="reportModal" class="report-modal">
 <div class="report-content">
 <div class="report-header">
-<h1 id="brandReportTitle">FACE READER - DAILY REPORT</h1>
+<h1 id="brandReportTitle">FACE READER PREMIUM - DAILY REPORT</h1>
 <p id="reportDate">Generated on: </p>
 <p id="reportLocation">Location: All Sites</p>
 </div>
@@ -233,7 +235,9 @@ body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: 
 </div>
 </div>
 </div>
+
 <script>
+const SITE_ID = "I";
 const firebaseConfig = {
   apiKey: "AIzaSyB_15MmxhiCHk7OADT0wlUYuJ_Fc_YyfUg",
   authDomain: "face-reader-premium.firebaseapp.com",
@@ -245,16 +249,18 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const signinsRef = db.ref('signins');
-const statusRef = db.ref('status');
-const usersRef = db.ref('users');
+const signinsRef = db.ref('sites/' + SITE_ID + '/signins');
+const statusRef = db.ref('sites/' + SITE_ID + '/status');
+const usersRef = db.ref('sites/' + SITE_ID + '/users');
 const settingsRef = db.ref('settings/branding');
+
 let allRecords = [];
 let statusData = {};
 let usersData = {};
 let allLocations = new Set(['all']);
 let charts = {};
 let currentLogoData = '';
+
 function todayStart() { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
 function escapeHtml(text) {
 if (!text) return '';
@@ -366,7 +372,7 @@ reader.readAsDataURL(file);
 function saveBranding() {
 const branding = {
 name: document.getElementById('brandName').value.trim() || 'FACE READER',
-footer: document.getElementById('brandFooter').value.trim() || 'Face Reader Basic © 2026',
+footer: document.getElementById('brandFooter').value.trim() || 'Face Reader Premium © 2026',
 logoUrl: currentLogoData,
 color: document.getElementById('brandColor').value,
 color2: document.getElementById('brandColor2').value
@@ -392,7 +398,7 @@ if(systemNameEl) systemNameEl.textContent = '';
 }
 }
 const footerEl = document.getElementById('brandFooterText');
-if (footerEl) footerEl.textContent = data.footer || 'Face Reader Basic © 2026';
+if (footerEl) footerEl.textContent = data.footer || 'Face Reader Premium © 2026';
 const reportTitle = document.getElementById('brandReportTitle');
 if (reportTitle) reportTitle.textContent = (data.name || 'FACE READER') + ' - DAILY REPORT';
 document.getElementById('brandName').value = data.name || '';
@@ -498,8 +504,8 @@ async function clearToday() {
 if (!confirm('⚠️ Delete ALL today\'s records and reset status?')) return;
 const today = todayStart();
 const updates = {};
-allRecords.forEach(r => { if (r.timestamp && r.timestamp >= today) updates['signins/' + r.id] = null; });
-Object.keys(statusData).forEach(userId => { updates['status/' + userId] = { onSite: false, lastAction: 'CLEARED', lastTimestamp: firebase.database.ServerValue.TIMESTAMP }; });
+allRecords.forEach(r => { if (r.timestamp && r.timestamp >= today) updates['sites/' + SITE_ID + '/signins/' + r.id] = null; });
+Object.keys(statusData).forEach(userId => { updates['sites/' + SITE_ID + '/status/' + userId] = { onSite: false, lastAction: 'CLEARED', lastTimestamp: firebase.database.ServerValue.TIMESTAMP }; });
 await db.ref().update(updates);
 alert('✅ Dashboard cleared!');
 location.reload();
