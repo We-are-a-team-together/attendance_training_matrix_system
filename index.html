@@ -112,14 +112,21 @@ async function startCamera() {
 }
 
 async function captureFace() {
-  if (!isCameraActive) { setStatus(' Camera not active.', 'error'); return; }
-  setStatus(' Capturing face...', 'scanning'); btnCapture.disabled = true;
-  try {
-    if (video.paused || video.ended) await video.play();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-    if (!detection) { setStatus(' No face detected! Try better lighting.', 'error'); btnCapture.disabled = false; return; }
-    const faceDescriptor = Array.from(detection.descriptor);
+  showStatus('⏳ Capturing...', 'info');
+try {
+const detection = await faceapi.detectSingleFace(document.getElementById('video'), new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+if (!detection) { hideLocationInfo(); showStatus('⚠️ No face detected', 'error'); return; }
+const result = findBestMatch(detection.descriptor);
+if (result.match) { await recordSignin(result.match.id, result.match.name, result.match.company, 'FACE'); stopFaceScan(); }
+else { hideLocationInfo(); showStatus('Face not recognized - try QR', 'error'); }
+} catch (err) { hideLocationInfo(); showStatus('❌ Error', 'error'); }
+}
+function findBestMatch(inputDescriptor) {
+const THRESHOLD = 0.75;
+for (const [id, data] of Object.entries(faceDescriptors)) {
+const distance = faceapi.euclideanDistance(inputDescriptor, new Float32Array(data.descriptor));
+if (distance < THRESHOLD) { const operative = operatives[id]; if (operative) return { match: { id, name: operative.name, company: operative.company } }; }
+}
     const name = document.getElementById('name').value.trim();
     const company = document.getElementById('company').value.trim();
     const location = document.getElementById('location').value.trim();
