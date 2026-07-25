@@ -123,8 +123,8 @@ form.addEventListener('submit', async (e) => {
       showStatus('✅ Updated successfully', 'success'); 
     } else { 
       data.createdAt = firebase.database.ServerValue.TIMESTAMP; 
-      await operativesRef.push(data); 
-      await faceDescriptorsRef.child(operativesRef.push().key).set({ name: data.name, company: data.company, location: data.location }); // Note: simplified for new adds, actual ID handled by push
+      const newRef = await operativesRef.push(data);
+      await faceDescriptorsRef.child(newRef.key).set({ name: data.name, company: data.company, location: data.location });
       showStatus('✅ Added! Use Face Registration to capture face', 'success'); 
     }
     resetForm();
